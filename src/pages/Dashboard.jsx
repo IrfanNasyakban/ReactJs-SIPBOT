@@ -23,7 +23,6 @@ const Dashboard = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentGeneratingText, setCurrentGeneratingText] = useState("");
-  const [mood, setMood] = useState("happy");
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [redirectPath, setRedirectPath] = useState("");
@@ -282,15 +281,6 @@ const Dashboard = () => {
 
       setMessages((prev) => [...prev, aiMsg]);
       streamText(aiResponse, aiMessageId);
-
-      // Update mood based on response
-      if (aiResponse.includes("love") || aiResponse.includes("💖")) {
-        setMood("love");
-      } else if (aiResponse.includes("blush") || aiResponse.includes("😊")) {
-        setMood("shy");
-      } else {
-        setMood("happy");
-      }
     }, 1000);
   };
 
@@ -371,9 +361,9 @@ const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 p-1">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 p-1">
                   <div className="w-full h-full rounded-full bg-white flex items-center justify-center text-2xl">
-                    💕
+                    🤖
                   </div>
                 </div>
                 <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
@@ -384,12 +374,12 @@ const Dashboard = () => {
                     isDark ? "text-white" : "text-gray-800"
                   }`}
                 >
-                  Chat with <span className="text-pink-500">Bella</span>
+                  Chat with <span style={{ color: currentColor }}>SIPBOT</span>
                 </h1>
                 <p className="text-sm text-green-500 flex items-center gap-1">
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                   {isGenerating
-                    ? "Bella is typing..."
+                    ? "SIPBOT is typing..."
                     : "Online • Always here for you~"}
                 </p>
               </div>
@@ -430,27 +420,6 @@ const Dashboard = () => {
                     />
                   </div>
                 </div>
-
-                {/* Floating Hearts */}
-                {mood === "love" && (
-                  <>
-                    {[...Array(5)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute text-2xl"
-                        initial={{ opacity: 1, y: 0, x: Math.random() * 100 }}
-                        animate={{ opacity: 0, y: -100 }}
-                        transition={{
-                          duration: 2,
-                          delay: i * 0.2,
-                          repeat: Infinity,
-                        }}
-                      >
-                        💕
-                      </motion.div>
-                    ))}
-                  </>
-                )}
               </div>
 
               {/* Stats */}

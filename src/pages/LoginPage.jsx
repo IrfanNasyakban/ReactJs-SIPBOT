@@ -6,6 +6,8 @@ import { LoginUser, reset } from "../features/authSlice";
 import { HiEye, HiEyeOff, HiUser, HiLockClosed } from "react-icons/hi";
 
 import mascotImg from "../assets/mascot.png";
+import imigrasiImg from "../assets/logo_imigrasi.png";
+import pemasyarakatanImg from "../assets/logo_pemasyarakatan.png";
 import backgroundImg from "../assets/background.png";
 
 const LoginPage = () => {
@@ -53,11 +55,22 @@ const LoginPage = () => {
         {/* Kiri: Mascot */}
         <div className="hidden lg:flex flex-1 items-center justify-center">
           <img
-            src={mascotImg}
+            src={imigrasiImg}
             alt="SIPBOT Mascot"
-            className="w-72 xl:w-80 object-contain select-none drop-shadow-2xl animate-bounce"
+            className="w-72 xl:w-80 object-contain select-none drop-shadow-2xl"
             draggable={false}
           />
+          <img
+            src={pemasyarakatanImg}
+            alt="SIPBOT Mascot"
+            className="w-72 xl:w-80 object-contain select-none drop-shadow-2xl"
+            draggable={false}
+          />
+          <div class="header-text">
+            <p class="main-title">Kementerian Imigrasi dan Pemasyarakatan</p>
+            <p class="sub-title">Kantor Wilayah Direktorat Jenderal Imigrasi Aceh</p>
+            <p class="sub-title">Kantor Imigrasi Kelas II TPI Lhokseumawe</p>
+        </div>
         </div>
 
         {/* Kanan: Form Login */}
