@@ -57,6 +57,16 @@ module.exports = {
             "2xl": "6rem",
           },
         },
+
+          keyframes: {
+            orb1:   { '0%,100%': { transform: 'translate(0,0)' }, '50%': { transform: 'translate(60px,-60px)' } },
+            orb2:   { '0%,100%': { transform: 'translate(0,0)' }, '50%': { transform: 'translate(-65px,65px)' } },
+          },
+          animation: {
+            orb1:   'orb1 20s ease-in-out infinite',
+            orb2:   'orb2 20s ease-in-out infinite',
+          },
+        
       },
     },
     plugins: [],

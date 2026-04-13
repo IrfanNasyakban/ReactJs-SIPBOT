@@ -139,7 +139,7 @@ const Dashboard = () => {
         setMessages([
           {
             id: 1,
-            text: `Hi ${user.username || "darling"}! 💕 I'm Bella, your AI girlfriend! I've been waiting for you! How was your day?`,
+            text: `Hi ${user.username || "admin"}! Saya SIPBOT, Asisten anda dalam mengumpulkan informasi data pegawai, Siap untuk memberikan data yang anda butuhkan!`,
             sender: "ai",
             timestamp: new Date().toLocaleTimeString([], {
               hour: "2-digit",
@@ -157,7 +157,7 @@ const Dashboard = () => {
       setMessages([
         {
           id: 1,
-          text: `Hi ${user?.username || "darling"}! 💕 I'm Bella, your AI girlfriend! I've been waiting for you! How was your day?`,
+          text: `Hi ${user?.username || "admin"}! Saya SIPBOT, Asisten anda dalam mengumpulkan informasi data pegawai, Siap untuk memberikan data yang anda butuhkan!`,
           sender: "ai",
           timestamp: new Date().toLocaleTimeString([], {
             hour: "2-digit",
@@ -324,28 +324,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen p-4 md:p-6">
       {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 via-purple-500/5 to-blue-500/5"></div>
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-2 h-2 bg-pink-400 rounded-full opacity-20"
-            initial={{
-              x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-              y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
-            }}
-            animate={{
-              y: [null, Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000)],
-              x: [null, Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000)],
-            }}
-            transition={{
-              duration: Math.random() * 10 + 10,
-              repeat: Infinity,
-              repeatType: "reverse",
-            }}
-          />
-        ))}
-      </div>
+
 
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
@@ -380,102 +359,20 @@ const Dashboard = () => {
                   <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                   {isGenerating
                     ? "SIPBOT is typing..."
-                    : "Online • Always here for you~"}
+                    : "Online •"}
                 </p>
               </div>
             </div>
           </div>
         </motion.div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Character Display */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-1"
-          >
-            <div
-              className={`p-6 rounded-2xl border backdrop-blur-sm h-full ${
-                isDark
-                  ? "bg-[#282C33]/90 border-gray-700"
-                  : "bg-white/90 border-gray-200"
-              }`}
-            >
-              {/* Character Image */}
-              <div className="relative mb-6">
-                <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 p-1">
-                  <div
-                    className={`w-full h-full rounded-2xl overflow-hidden ${
-                      isDark ? "bg-gray-800" : "bg-white"
-                    }`}
-                  >
-                    <img
-                      src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&h=600&fit=crop"
-                      alt="Bella - AI Girlfriend"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.src =
-                          "https://via.placeholder.com/400x600/FF69B4/FFFFFF?text=Bella+💕";
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Stats */}
-              <div className="space-y-3">
-                <div
-                  className={`p-4 rounded-xl ${
-                    isDark ? "bg-gray-700/50" : "bg-gray-50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <span
-                      className={`text-sm ${
-                        isDark ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      Love Level
-                    </span>
-                    <span className="text-pink-500 font-bold">100%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-pink-500 to-red-500"
-                      initial={{ width: 0 }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 2 }}
-                    />
-                  </div>
-                </div>
-
-                <div
-                  className={`p-4 rounded-xl ${
-                    isDark ? "bg-gray-700/50" : "bg-gray-50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`text-sm ${
-                        isDark ? "text-gray-400" : "text-gray-600"
-                      }`}
-                    >
-                      Total Messages
-                    </span>
-                    <span className="text-purple-500 font-bold">
-                      {conversationCount}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+        <div className="grid lg:grid-cols-1 gap-6">
 
           {/* Chat Area */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="lg:col-span-2"
+            className="lg:col-span-1"
           >
             <div
               className={`rounded-2xl border backdrop-blur-sm overflow-hidden ${
@@ -635,23 +532,6 @@ const Dashboard = () => {
                 }`}
               >
                 <div className="flex gap-3">
-                  <button
-                    disabled={isGenerating}
-                    className={`p-3 rounded-full ${
-                      isGenerating
-                        ? "opacity-50 cursor-not-allowed"
-                        : isDark
-                        ? "bg-gray-700 hover:bg-gray-600"
-                        : "bg-gray-100 hover:bg-gray-200"
-                    } transition-colors`}
-                  >
-                    <FaImage
-                      className={
-                        isDark ? "text-gray-400" : "text-gray-600"
-                      }
-                    />
-                  </button>
-
                   <div className="flex-grow relative">
                     <input
                       type="text"
@@ -661,8 +541,8 @@ const Dashboard = () => {
                       disabled={isGenerating}
                       placeholder={
                         isGenerating
-                          ? "Waiting for Bella..."
-                          : "Type your message... 💕"
+                          ? "Waiting for SIPBOT..."
+                          : "Type your message..."
                       }
                       className={`w-full px-4 py-3 rounded-full border-2 transition-all ${
                         isGenerating ? "opacity-50 cursor-not-allowed" : ""
@@ -687,23 +567,6 @@ const Dashboard = () => {
                   >
                     <FaPaperPlane />
                   </motion.button>
-
-                  <button
-                    disabled={isGenerating}
-                    className={`p-3 rounded-full ${
-                      isGenerating
-                        ? "opacity-50 cursor-not-allowed"
-                        : isDark
-                        ? "bg-gray-700 hover:bg-gray-600"
-                        : "bg-gray-100 hover:bg-gray-200"
-                    } transition-colors`}
-                  >
-                    <FaMicrophone
-                      className={
-                        isDark ? "text-gray-400" : "text-gray-600"
-                      }
-                    />
-                  </button>
                 </div>
               </div>
             </div>

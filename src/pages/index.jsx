@@ -1,3 +1,8 @@
 export { default as Dashboard } from './Dashboard';
 export { default as LoginPage } from './LoginPage';
 export { default as Page404 } from './Page404';
+export { default as ListPegawai } from './ListPegawai';
+export { default as ListKepegawaian } from './ListKepegawaian';
+export { default as ListPangkat } from './ListPangkat';
+export { default as ListRekening } from './ListRekening';
+export { default as ListAlamat } from './ListAlamat';

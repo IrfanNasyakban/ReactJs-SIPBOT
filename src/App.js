@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import { Navbar, Footer, Sidebar, ThemeSettings } from "./components";
-import { Page404, LoginPage, Dashboard } from "./pages";
+import { Page404, LoginPage, Dashboard, ListPegawai } from "./pages";
 
 import { useStateContext } from "./contexts/ContextProvider";
 
@@ -67,6 +67,7 @@ const AppContent = () => {
             <Routes>
               <Route path="/" element={<LoginPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/pegawai" element={<ListPegawai />} />
               
               Portfolio Routes
 
