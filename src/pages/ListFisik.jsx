@@ -4,23 +4,25 @@ import {
   HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
-import { dummyAlamat } from "../data/dummy";
+import { dummyFisik } from "../data/dummy";
 
 const ITEMS_PER_PAGE = 10;
 
-const ListAlamat = () => {
+const ListFisik = () => {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [alamat] = useState(dummyAlamat);
+  const [fisik] = useState(dummyFisik);
   const [isLoading] = useState(false);
 
   const navigate = useNavigate();
   const { currentColor, currentMode } = useStateContext();
   const isDark = currentMode === 'Dark';
 
-  const filtered = alamat.filter(
-    (a) => a.nama.toLowerCase().includes(search.toLowerCase())
+  const filtered = fisik.filter(
+    (f) => f.nama.toLowerCase().includes(search.toLowerCase()) ||
+           f.warna_kulit.toLowerCase().includes(search.toLowerCase()) ||
+           f.tinggi_badan.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -76,10 +78,10 @@ const ListAlamat = () => {
             <h1 className={`text-xl font-bold tracking-wide ${
               isDark ? 'text-white' : 'text-gray-900'
             }`}>
-              Data <span style={{ color: currentColor }}>Alamat</span>
+              Data <span style={{ color: currentColor }}>Fisik</span>
             </h1>
             <p className="text-xs mt-1" style={{ color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)" }}>
-              Manajemen data alamat KTP dan domisili pegawai
+              Manajemen data karakteristik fisik pegawai
             </p>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
@@ -91,7 +93,7 @@ const ListAlamat = () => {
               />
               <input
                 type="text"
-                placeholder="Cari nama..."
+                placeholder="Cari nama / tinggi / warna..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                 className={`pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none transition-all duration-200 w-56 ${
@@ -113,7 +115,7 @@ const ListAlamat = () => {
             </div>
             {/* Add Button */}
             <button
-              onClick={() => navigate("/alamat/add")}
+              onClick={() => navigate("/fisik/add")}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-88 hover:-translate-y-0.5"
               style={{
                 background: currentColor,
@@ -156,11 +158,11 @@ const ListAlamat = () => {
           {/* Scrollable table */}
           {!isLoading && (
             <div className="overflow-x-auto">
-              <table className="w-full" style={{ minWidth: 1200, borderCollapse: "collapse" }}>
+              <table className="w-full" style={{ minWidth: 1400, borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ background: isDark ? "rgba(56,139,255,.1)" : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`, borderBottom: `1px solid ${isDark ? "rgba(56,139,255,.2)" : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.15)`}` }}>
                     {[
-                      "No", "Nama", "Alamat KTP", "Alamat Domisili", "Aksi",
+                      "No", "Nama", "Tinggi Badan", "Jenis Rambut", "Warna Rambut", "Bentuk Wajah", "Warna Kulit", "Ciri Khusus", "Aksi",
                     ].map((h) => (
                       <th
                         key={h}
@@ -178,15 +180,15 @@ const ListAlamat = () => {
                 <tbody>
                   {paginated.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="text-center py-16"
+                      <td colSpan={9} className="text-center py-16"
                           style={{ color: isDark ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.3)", fontSize: 14 }}>
                         Tidak ada data ditemukan
                       </td>
                     </tr>
                   ) : (
-                    paginated.map((a, i) => (
+                    paginated.map((f, i) => (
                       <tr
-                        key={a.uuid}
+                        key={f.uuid}
                         style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"}` }}
                         className={`transition-colors duration-150 ${isDark ? 'hover:bg-blue-500/5' : 'hover:bg-gray-100/30'}`}
                       >
@@ -197,22 +199,36 @@ const ListAlamat = () => {
                         </td>
                         {/* Nama */}
                         <td className="px-4 py-3">
-                          <span className={`text-sm font-semibold whitespace-nowrap ${
+                          <span className={`text-sm font-semibold ${
                             isDark ? 'text-white' : 'text-gray-900'
                           }`}>
-                            {a.nama}
+                            {f.nama}
                           </span>
                         </td>
-                        {/* Alamat KTP */}
+                        {/* Tinggi Badan */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          <div className="max-w-xs truncate" title={a.alamat_ktp}>
-                            {a.alamat_ktp}
-                          </div>
+                          {f.tinggi_badan}
                         </td>
-                        {/* Alamat Domisili */}
+                        {/* Jenis Rambut */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          <div className="max-w-xs truncate" title={a.alamat_domisili}>
-                            {a.alamat_domisili}
+                          {f.jenis_rambut}
+                        </td>
+                        {/* Warna Rambut */}
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
+                          {f.warna_rambut}
+                        </td>
+                        {/* Bentuk Wajah */}
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
+                          {f.bentuk_wajah}
+                        </td>
+                        {/* Warna Kulit */}
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
+                          {f.warna_kulit}
+                        </td>
+                        {/* Ciri Khusus */}
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
+                          <div className="max-w-xs" title={f.ciri_khusus}>
+                            {f.ciri_khusus}
                           </div>
                         </td>
                         {/* Aksi */}
@@ -220,7 +236,7 @@ const ListAlamat = () => {
                           <div className="flex items-center justify-center gap-1.5">
                             {/* View */}
                             <button
-                              onClick={() => navigate(`/alamat/${a.uuid}`)}
+                              onClick={() => navigate(`/fisik/${f.uuid}`)}
                               title="Lihat Detail"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{
@@ -235,7 +251,7 @@ const ListAlamat = () => {
                             </button>
                             {/* Edit */}
                             <button
-                              onClick={() => navigate(`/alamat/edit/${a.uuid}`)}
+                              onClick={() => navigate(`/fisik/edit/${f.uuid}`)}
                               title="Edit"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{
@@ -250,7 +266,7 @@ const ListAlamat = () => {
                             </button>
                             {/* Delete */}
                             <button
-                              onClick={() => setConfirmDelete(a.uuid)}
+                              onClick={() => setConfirmDelete(f.uuid)}
                               title="Hapus"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{
@@ -346,10 +362,10 @@ const ListAlamat = () => {
             <h3 className={`font-semibold text-center text-base mb-2 ${
               isDark ? 'text-white' : 'text-gray-900'
             }`}>
-              Hapus Data Alamat?
+              Hapus Data Fisik?
             </h3>
             <p className="text-center text-sm mb-6" style={{ color: isDark ? "rgba(255,255,255,.4)" : "rgba(0,0,0,.5)" }}>
-              Tindakan ini tidak dapat dibatalkan. Data alamat akan dihapus secara permanen.
+              Tindakan ini tidak dapat dibatalkan. Data fisik akan dihapus secara permanen.
             </p>
             <div className="flex gap-3">
               <button
@@ -381,4 +397,4 @@ const ListAlamat = () => {
   );
 };
 
-export default ListAlamat;
+export default ListFisik;

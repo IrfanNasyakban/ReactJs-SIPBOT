@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import { Navbar, Footer, Sidebar, ThemeSettings } from "./components";
-import { Page404, LoginPage, Dashboard, ListPegawai } from "./pages";
+import { Page404, LoginPage, Dashboard, ListPegawai, ListKepegawaian, ListPangkat, ListAlamat, ListIdentitas, ListRekening, ListPendidikan, ListFisik, ListUkuran, ListPasangan, ListAnak } from "./pages";
 
 import { useStateContext } from "./contexts/ContextProvider";
 
@@ -34,30 +34,30 @@ const AppContent = () => {
 
   return (
     <div className={currentMode === "Dark" ? "dark" : ""}>
-      <div className="flex relative dark:bg-main-dark-bg">
+      <div className="flex relative dark:bg-[#040c24]">
         
         {/* Theme Settings Modal */}
         {themeSettings && <ThemeSettings />}
 
         {/* Sidebar */}
         { !isLoginPage && !isChatAI && !isNotFound && !isChatGirlfriend && !isCertificatesPage && !isProjectsPage &&  activeMenu ? (
-          <div className="w-72 fixed sidebar dark:bg-secondary-dark-bg bg-white">
+          <div className="w-72 fixed sidebar dark:bg-[#040c24] bg-white">
             <Sidebar />
           </div>
         ) : !isLoginPage && !isChatAI && !isNotFound && !isChatGirlfriend && !isCertificatesPage && !isProjectsPage ? (
-          <div className="w-0 dark:bg-secondary-dark-bg">
+          <div className="w-0 dark:bg-[#040c24]">
             <Sidebar />
           </div>
         ) : null}
 
         {/* Main Content */}
         <div
-          className={`main-content dark:bg-main-dark-bg bg-main-bg min-h-screen w-full ${
+          className={`main-content dark:bg-[#040c24] bg-main-bg min-h-screen w-full ${
             activeMenu && !isLoginPage && !isChatAI && !isNotFound && !isChatGirlfriend && !isCertificatesPage && !isProjectsPage ? "sidebar-visible" : "full-width"
           }`}
         >
           { !isLoginPage && !isChatAI && !isNotFound && !isChatGirlfriend && !isCertificatesPage && !isProjectsPage && (
-            <div className="fixed md:static bg-main-bg dark:bg-main-dark-bg navbar w-full">
+            <div className="fixed md:static bg-main-bg dark:bg-[#040c24] navbar w-full">
               <Navbar />
             </div>
           )}
@@ -68,7 +68,17 @@ const AppContent = () => {
               <Route path="/" element={<LoginPage />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/pegawai" element={<ListPegawai />} />
-              
+              <Route path="/kepegawaian" element={<ListKepegawaian />} />
+              <Route path="/pangkat" element={<ListPangkat />} />
+              <Route path="/alamat" element={<ListAlamat />} />
+              <Route path="/identitas" element={<ListIdentitas />} />
+              <Route path="/rekening" element={<ListRekening />} />
+              <Route path="/pendidikan" element={<ListPendidikan />} />
+              <Route path="/fisik" element={<ListFisik />} />
+              <Route path="/ukuran" element={<ListUkuran />} />
+              <Route path="/pasangan" element={<ListPasangan />} />
+              <Route path="/anak" element={<ListAnak />} />
+
               Portfolio Routes
 
               <Route path="/page-not-found" element={<Page404 />} />

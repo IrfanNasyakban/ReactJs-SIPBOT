@@ -78,13 +78,13 @@ const Sidebar = () => {
           allowedRoles: ['admin']
         },
         {
-          name: 'dinas',
+          name: 'ukuran',
           displayName: 'Dinas',
           icon: <FaUsers />,
           allowedRoles: ['admin']
         },
         {
-          name: 'keluarga',
+          name: 'pasangan',
           displayName: 'Keluarga',
           icon: <FaUsers />,
           allowedRoles: ['admin']
@@ -141,15 +141,18 @@ const Sidebar = () => {
 
   return (
     <div 
-      className={`ml-3 h-screen md:overflow-hidden overflow-auto md:hover:overflow-auto pb-10 ${
-        isDark ? 'bg-[#282C33]' : 'bg-white'
+      className={`ml-3 h-screen relative overflow-hidden ${
+        isDark ? 'bg-[#040c24]' : 'bg-white'
       }`}
       style={{ 
-        borderRight: `1px solid ${isDark ? '#374151' : '#E5E7EB'}` 
+        borderRight: `1px solid ${isDark ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.08)'}` 
       }}
     >
-      {activeMenu && (<>
-        {/* Header Section */}
+
+      {/* Content Wrapper */}
+      <div className="relative z-10 h-screen overflow-y-auto overflow-x-hidden md:hover:overflow-y-auto pb-10">
+        {activeMenu && (<>
+          {/* Header Section */}
         <div 
           className={`flex justify-between items-center pb-4 border-b ${
             isDark ? 'border-gray-700' : 'border-gray-200'
@@ -181,53 +184,92 @@ const Sidebar = () => {
           </button>
         </div>
 
-        {/* Navigation Links */}
-        <div className='mt-6 px-2'>
-          {links.map((item) => (
-            <div key={item.title} className="mb-6">
-              {/* Section Header */}
-              <p 
-                className={`text-xs font-semibold uppercase tracking-wider mx-4 mb-3 ${
-                  isDark ? 'text-gray-500' : 'text-gray-400'
-                }`}
-              >
-                #{item.title.toLowerCase().replace(' ', '-')}
-              </p>
-              
-              {/* Navigation Items */}
-              {item.links.map((link) => (
-                <NavLink 
-                  to={`/${link.name}`} 
-                  key={link.name} 
-                  onClick={handleCloseSideBar} 
-                  className={({ isActive }) => 
-                    isActive ? activeLink : normalLink
-                  }
-                  style={({ isActive }) => 
-                    isActive 
-                      ? { backgroundColor: currentColor }
-                      : {}
-                  }
+          {/* Navigation Links */}
+          <div className='mt-6 px-3 space-y-8'>
+            {links.map((item) => (
+              <div key={item.title} className="space-y-2">
+                {/* Section Header */}
+                <p 
+                  className={`text-[10px] font-bold uppercase tracking-widest px-3 ${
+                    isDark ? 'text-gray-600' : 'text-gray-500'
+                  }`}
                 >
-                  <span className="text-lg">{link.icon}</span>
-                  <span className='font-medium'>{link.displayName}</span>
-                </NavLink>
-              ))}
-            </div>
-          ))}
-        </div>
+                  {item.title}
+                </p>
+                
+                {/* Navigation Items */}
+                <div className="space-y-1">
+                  {item.links.map((link) => (
+                    <NavLink 
+                      to={`/${link.name}`} 
+                      key={link.name} 
+                      onClick={handleCloseSideBar} 
+                      className={({ isActive }) => {
+                        const baseStyle = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative overflow-hidden group`;
+                        
+                        if (isActive) {
+                          return `${baseStyle} text-white`;
+                        }
+                        
+                        return `${baseStyle} ${
+                          isDark 
+                            ? 'text-gray-400 hover:text-gray-200' 
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`;
+                      }}
+                      style={({ isActive }) => 
+                        isActive 
+                          ? { 
+                              backgroundColor: currentColor,
+                              boxShadow: `0 4px 12px ${currentColor}40`
+                            }
+                          : {}
+                      }
+                    >
+                      {/* Background glow on hover */}
+                      <div
+                        className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-10 ${
+                          isDark ? 'bg-gray-800' : 'bg-gray-100'
+                        }`}
+                      />
+                      
+                      <span className="text-base flex-shrink-0">{link.icon}</span>
+                      <span className='flex-1'>{link.displayName}</span>
+                      
+                      {/* Active indicator */}
+                      <div 
+                        className="absolute right-0 top-0 bottom-0 w-1 rounded-full transition-all duration-200"
+                        style={{
+                          background: 'currentColor',
+                          opacity: 0
+                        }}
+                      />
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
 
-        {/* Decorative grid pattern at bottom */}
-        <div className="absolute bottom-10 left-10 grid grid-cols-5 gap-2 opacity-20 pointer-events-none">
-          {[...Array(25)].map((_, i) => (
-            <div 
-              key={`sidebar-grid-${i}`} 
-              className="w-1 h-1"
-              style={{ backgroundColor: currentColor }}
-            />
-          ))}
-        </div>
-      </>)}
+          {/* Footer Decorative Element */}
+          <div className="absolute bottom-6 left-0 right-0 px-4">
+            <div className="relative">
+              {/* Decorative grid at bottom */}
+              <div 
+                className="grid grid-cols-6 gap-2 opacity-30 pointer-events-none"
+              >
+                {[...Array(12)].map((_, i) => (
+                  <div 
+                    key={`sidebar-grid-${i}`} 
+                    className="w-1.5 h-1.5 rounded-full transition-all duration-300"
+                    style={{ backgroundColor: currentColor }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </>)}
+      </div>
     </div>
   )
 }

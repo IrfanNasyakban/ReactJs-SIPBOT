@@ -323,9 +323,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen p-4 md:p-6">
-      {/* Animated Background */}
-
-
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Header */}
         <motion.div

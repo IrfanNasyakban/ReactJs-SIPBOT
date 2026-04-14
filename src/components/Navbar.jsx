@@ -12,16 +12,26 @@ import { UserProfile } from ".";
 import { useStateContext } from "../contexts/ContextProvider";
 
 const NavButton = ({ title, customFunc, icon, currentColor, currentMode }) => {
+  const isDark = currentMode === 'Dark';
   return (
     <button
       type="button"
       onClick={() => customFunc()}
-      className={`text-xl rounded-lg p-3 transition-all duration-300 ${
-        currentMode === 'Dark' 
-          ? 'text-gray-300 hover:bg-gray-700' 
-          : 'text-gray-700 hover:bg-gray-100'
+      className={`text-lg rounded-lg p-2.5 transition-all duration-300 relative group ${
+        isDark 
+          ? 'text-gray-300 hover:text-white' 
+          : 'text-gray-700 hover:text-gray-900'
       }`}
       title={title}
+      style={{
+        borderRadius: '10px',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.05)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = "transparent";
+      }}
     >
       {icon}
     </button>
@@ -142,21 +152,25 @@ const Navbar = () => {
 
   return (
     <div 
-      className={`flex justify-between items-center p-1 relative z-50 border-b ${
-        isDark ? 'bg-[#282C33] border-gray-700' : 'bg-white border-gray-200'
+      className={`flex justify-between items-center px-6 py-4 relative z-50 border-b backdrop-blur-sm transition-colors duration-300 ${
+        isDark 
+           ? 'bg-[#040c24]/80 border-gray-900' 
+          : 'bg-white/80 border-gray-200'
       }`}
     >
       {/* Left Section - Menu Button */}
-      <NavButton
-        title="Menu"
-        customFunc={handleActiveMenu}
-        icon={<AiOutlineMenu />}
-        currentColor={currentColor}
-        currentMode={currentMode}
-      />
+      <div className="flex items-center gap-2">
+        <NavButton
+          title="Menu"
+          customFunc={handleActiveMenu}
+          icon={<AiOutlineMenu />}
+          currentColor={currentColor}
+          currentMode={currentMode}
+        />
+      </div>
 
       {/* Right Section - Settings & User Profile */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {/* Theme Settings Button */}
         <NavButton
           title="Settings"
@@ -168,15 +182,15 @@ const Navbar = () => {
 
         {/* User Profile Dropdown */}
         <div
-          className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-all duration-300 relative z-50 ${
+          className={`flex items-center gap-3 cursor-pointer px-3 py-2 rounded-lg transition-all duration-300 relative z-50 ${
             isDark 
-              ? 'hover:bg-gray-700' 
-              : 'hover:bg-gray-100'
+              ? 'hover:bg-gray-800/50' 
+              : 'hover:bg-gray-100/50'
           }`}
           onClick={() => handleClick("userProfile")}
         >
           <img
-            className="rounded-full w-10 h-10 border-2"
+            className="rounded-full w-9 h-9 border-2 transition-transform duration-300 hover:scale-110"
             style={{ borderColor: safeColor }}
             src={urlImage && urlImage !== "http://localhost:5000/images/null" ? urlImage : avatar}
             alt="user-profile"
@@ -190,25 +204,18 @@ const Navbar = () => {
             >
               {user ? capitalizeFirstLetter(user.username) : "Admin"}
             </p>
-            <p 
-              className={`text-xs ${
-                isDark ? 'text-gray-400' : 'text-gray-500'
-              }`}
-            >
-              Portfolio Admin
-            </p>
           </div>
           
           <MdKeyboardArrowDown 
-            className={`text-lg ${
+            className={`text-lg transition-transform duration-300 ${
               isDark ? 'text-gray-400' : 'text-gray-500'
-            }`}
+            } ${isClicked.userProfile ? 'rotate-180' : ''}`}
           />
         </div>
 
         {/* User Profile Dropdown Menu */}
         {isClicked.userProfile && (
-          <div className="absolute top-full right-0 mt-2 z-[9999]">
+          <div className="absolute top-full right-6 mt-3 z-[9999]">
             <UserProfile />
           </div>
         )}

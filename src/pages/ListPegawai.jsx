@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
+import { useStateContext } from "../contexts/ContextProvider";
 import { dummyPegawai } from "../data/dummy";
 
 const ITEMS_PER_PAGE = 10;
@@ -16,6 +17,8 @@ const ListPegawai = () => {
   const [isLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { currentColor, currentMode } = useStateContext();
+  const isDark = currentMode === 'Dark';
 
   const filtered = pegawai.filter(
     (p) =>
@@ -42,15 +45,21 @@ const ListPegawai = () => {
     }`;
 
   const statusBadge = (status) => {
-    const map = {
+    const mapDark = {
       PNS: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
       PPPK: "bg-blue-500/10 text-blue-400 border-blue-500/30",
       Honorer: "bg-amber-500/10 text-amber-400 border-amber-500/30",
     };
+    const mapLight = {
+      PNS: "bg-emerald-500/15 text-emerald-600 border-emerald-500/40",
+      PPPK: "bg-blue-500/15 text-blue-600 border-blue-500/40",
+      Honorer: "bg-amber-500/15 text-amber-600 border-amber-500/40",
+    };
+    const map = isDark ? mapDark : mapLight;
     return (
       <span
         className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-          map[status] || "bg-white/5 text-white/50 border-white/10"
+          map[status] || isDark ? "bg-white/5 text-white/50 border-white/10" : "bg-black/5 text-black/50 border-black/10"
         }`}
       >
         {status}
@@ -70,40 +79,36 @@ const ListPegawai = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#040c24] overflow-hidden font-sans">
+    <div className={`min-h-screen overflow-hidden font-sans ${
+      isDark ? 'bg-[#040c24]' : 'bg-gray-50'
+    }`}>
 
       {/* ── Background ── */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(56,139,255,.06) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(56,139,255,.06) 1px, transparent 1px)
+            linear-gradient(${isDark ? 'rgba(56,139,255,.06)' : 'rgba(148,163,184,.06)'} 0.4px, transparent 0.5px),
+            linear-gradient(90deg, ${isDark ? 'rgba(56,139,255,.06)' : 'rgba(148,163,184,.06)'} 0.4px, transparent 0.5px)
           `,
           backgroundSize: "48px 48px",
         }}
       />
-      <div
-        className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background: `repeating-linear-gradient(
-            0deg, transparent, transparent 3px,
-            rgba(56,139,255,.015) 3px, rgba(56,139,255,.015) 4px
-          )`,
-        }}
-      />
+      
       <div
         className="fixed rounded-full pointer-events-none z-0 animate-[orb1_12s_ease-in-out_infinite]"
         style={{
           width: 380, height: 380, filter: "blur(80px)",
-          background: "rgba(24,95,165,.28)", top: -100, left: -80,
+          background: isDark ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.28)` : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.15)`, 
+          top: -100, left: -80,
         }}
       />
       <div
         className="fixed rounded-full pointer-events-none z-0 animate-[orb2_15s_ease-in-out_infinite]"
         style={{
           width: 340, height: 340, filter: "blur(80px)",
-          background: "rgba(10,40,120,.32)", bottom: -80, right: -60,
+          background: isDark ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.32)` : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.18)`, 
+          bottom: -80, right: -60,
         }}
       />
 
@@ -113,10 +118,12 @@ const ListPegawai = () => {
         {/* Top bar */}
         <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-wide">
-              Data <span className="text-blue-400">Pegawai</span>
+            <h1 className={`text-xl font-bold tracking-wide ${
+              isDark ? 'text-white' : 'text-gray-900'
+            }`}>
+              Data <span style={{ color: currentColor }}>Pegawai</span>
             </h1>
-            <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,.35)" }}>
+            <p className="text-xs mt-1" style={{ color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)" }}>
               Manajemen data seluruh pegawai Kantor Imigrasi TPI Kelas II Lhokseumawe
             </p>
           </div>
@@ -125,25 +132,27 @@ const ListPegawai = () => {
             <div className="relative">
               <HiSearch
                 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-                style={{ color: "rgba(255,255,255,.3)" }}
+                style={{ color: isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.3)" }}
               />
               <input
                 type="text"
                 placeholder="Cari nama / NIP..."
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                className="pl-9 pr-4 py-2.5 rounded-xl text-sm text-white focus:outline-none transition-all duration-200 w-56"
+                className={`pl-9 pr-4 py-2.5 rounded-xl text-sm focus:outline-none transition-all duration-200 w-56 ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`}
                 style={{
-                  background: "rgba(255,255,255,.06)",
-                  border: "1px solid rgba(255,255,255,.12)",
+                  background: isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.03)",
+                  border: `1px solid ${isDark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.1)"}`,
                 }}
                 onFocus={(e) => {
-                  e.target.style.borderColor = "rgba(56,139,255,.7)";
-                  e.target.style.background = "rgba(56,139,255,.08)";
+                  e.target.style.borderColor = currentColor;
+                  e.target.style.background = isDark ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)` : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
                 }}
                 onBlur={(e) => {
-                  e.target.style.borderColor = "rgba(255,255,255,.12)";
-                  e.target.style.background = "rgba(255,255,255,.06)";
+                  e.target.style.borderColor = isDark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.1)";
+                  e.target.style.background = isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.03)";
                 }}
               />
             </div>
@@ -152,8 +161,8 @@ const ListPegawai = () => {
               onClick={() => navigate("/pegawai/add")}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-88 hover:-translate-y-0.5"
               style={{
-                background: "linear-gradient(135deg,#1d6fe8,#0ea5e9)",
-                boxShadow: "0 4px 18px rgba(29,111,232,.3)",
+                background: currentColor,
+                boxShadow: `0 4px 18px ${currentColor}4d`,
               }}
             >
               <HiPlus className="w-4 h-4" />
@@ -166,8 +175,8 @@ const ListPegawai = () => {
         <div
           className="rounded-2xl overflow-hidden relative"
           style={{
-            background: "rgba(255,255,255,.03)",
-            border: "1px solid rgba(56,139,255,.18)",
+            background: isDark ? "rgba(255,255,255,.03)" : "rgba(0,0,0,.02)",
+            border: `1px solid ${isDark ? "rgba(56,139,255,.18)" : "rgba(0,0,0,.1)"}`,
             backdropFilter: "blur(16px)",
           }}
         >
@@ -175,7 +184,7 @@ const ListPegawai = () => {
           <div
             className="absolute top-0 left-0 right-0 h-px pointer-events-none"
             style={{
-              background: "linear-gradient(90deg,transparent,rgba(56,139,255,.5),transparent)",
+              background: isDark ? "linear-gradient(90deg,transparent,rgba(56,139,255,.5),transparent)" : `linear-gradient(90deg,transparent,${currentColor}80,transparent)`,
             }}
           />
 
@@ -194,7 +203,7 @@ const ListPegawai = () => {
             <div className="overflow-x-auto">
               <table className="w-full" style={{ minWidth: 1200, borderCollapse: "collapse" }}>
                 <thead>
-                  <tr style={{ background: "rgba(56,139,255,.1)", borderBottom: "1px solid rgba(56,139,255,.2)" }}>
+                  <tr style={{ background: isDark ? "rgba(56,139,255,.1)" : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`, borderBottom: `1px solid ${isDark ? "rgba(56,139,255,.2)" : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.15)`}` }}>
                     {[
                       "No","NIP","Nama Pegawai","Gelar Depan","Gelar Belakang",
                       "Nama + Gelar","Tempat Lahir","Gender","Agama","Status",
@@ -205,7 +214,7 @@ const ListPegawai = () => {
                         className="px-4 py-3 text-left whitespace-nowrap"
                         style={{
                           fontSize: 11, fontWeight: 600, letterSpacing: "1.5px",
-                          textTransform: "uppercase", color: "rgba(140,180,255,.7)",
+                          textTransform: "uppercase", color: isDark ? "rgba(140,180,255,.7)" : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.7)`,
                         }}
                       >
                         {h}
@@ -217,7 +226,7 @@ const ListPegawai = () => {
                   {paginated.length === 0 ? (
                     <tr>
                       <td colSpan={15} className="text-center py-16"
-                          style={{ color: "rgba(255,255,255,.25)", fontSize: 14 }}>
+                          style={{ color: isDark ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.3)", fontSize: 14 }}>
                         Tidak ada data ditemukan
                       </td>
                     </tr>
@@ -225,71 +234,73 @@ const ListPegawai = () => {
                     paginated.map((p, i) => (
                       <tr
                         key={p.uuid}
-                        style={{ borderBottom: "1px solid rgba(255,255,255,.05)" }}
-                        className="transition-colors duration-150 hover:bg-blue-500/5"
+                        style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"}` }}
+                        className={`transition-colors duration-150 ${isDark ? 'hover:bg-blue-500/5' : 'hover:bg-gray-100/30'}`}
                       >
                         {/* No */}
                         <td className="px-4 py-3 text-sm"
-                            style={{ color: "rgba(255,255,255,.3)" }}>
+                            style={{ color: isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.5)" }}>
                           {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
                         </td>
                         {/* NIP */}
-                        <td className="px-4 py-3 font-mono text-xs text-blue-300 whitespace-nowrap">
+                        <td className="px-4 py-3 font-mono text-xs" style={{ color: currentColor }}>
                           {p.nip}
                         </td>
                         {/* Nama */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2.5">
-                            <span className="text-sm font-semibold text-white whitespace-nowrap">
+                            <span className={`text-sm font-semibold whitespace-nowrap ${
+                              isDark ? 'text-white' : 'text-gray-900'
+                            }`}>
                               {p.nama}
                             </span>
                           </div>
                         </td>
                         {/* Gelar Depan */}
-                        <td className="px-4 py-3 text-sm" style={{ color: "rgba(220,235,255,.8)" }}>
-                          {p.gelar_depan || <span style={{ color: "rgba(255,255,255,.2)" }}>—</span>}
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
+                          {p.gelar_depan || <span style={{ color: isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)" }}>—</span>}
                         </td>
                         {/* Gelar Belakang */}
-                        <td className="px-4 py-3 text-sm" style={{ color: "rgba(220,235,255,.8)" }}>
-                          {p.gelar_belakang || <span style={{ color: "rgba(255,255,255,.2)" }}>—</span>}
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
+                          {p.gelar_belakang || <span style={{ color: isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)" }}>—</span>}
                         </td>
                         {/* Nama + Gelar */}
                         <td className="px-4 py-3 text-xs whitespace-nowrap"
-                            style={{ color: "#c7d8f8" }}>
+                            style={{ color: isDark ? "#c7d8f8" : "rgba(0,0,0,.7)" }}>
                           {getFullName(p)}
                         </td>
                         {/* Tempat Lahir */}
-                        <td className="px-4 py-3 text-sm" style={{ color: "rgba(220,235,255,.8)" }}>
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
                           {p.tempat_lahir}
                         </td>
                         {/* Gender */}
                         <td className="px-4 py-3 text-sm font-semibold">
-                          <span style={{ color: p.gender === "L" ? "#60a5fa" : "#f472b6" }}>
+                          <span style={{ color: p.gender === "L" ? currentColor : "#f472b6" }}>
                             {p.gender}
                           </span>
                         </td>
                         {/* Agama */}
-                        <td className="px-4 py-3 text-sm" style={{ color: "rgba(220,235,255,.8)" }}>
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
                           {p.agama}
                         </td>
                         {/* Status */}
                         <td className="px-4 py-3">{statusBadge(p.status_pegawai)}</td>
                         {/* Email Pribadi */}
                         <td className="px-4 py-3 text-xs whitespace-nowrap"
-                            style={{ color: "rgba(180,210,255,.7)" }}>
+                            style={{ color: isDark ? "rgba(180,210,255,.7)" : "rgba(0,0,0,.6)" }}>
                           {p.email_pribadi}
                         </td>
                         {/* Email Dinas */}
                         <td className="px-4 py-3 text-xs whitespace-nowrap"
-                            style={{ color: "rgba(180,210,255,.7)" }}>
+                            style={{ color: isDark ? "rgba(180,210,255,.7)" : "rgba(0,0,0,.6)" }}>
                           {p.email_dinas}
                         </td>
                         {/* No Telp */}
-                        <td className="px-4 py-3 text-sm" style={{ color: "rgba(220,235,255,.8)" }}>
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
                           {p.no_telp}
                         </td>
                         {/* Hobi */}
-                        <td className="px-4 py-3 text-sm" style={{ color: "rgba(255,255,255,.45)" }}>
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(255,255,255,.45)" : "rgba(0,0,0,.5)" }}>
                           {p.hobi}
                         </td>
                         {/* Aksi */}
@@ -302,10 +313,10 @@ const ListPegawai = () => {
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{
                                 background: "transparent",
-                                border: "1px solid rgba(55,138,221,.35)",
-                                color: "#60a5fa",
+                                border: `1px solid ${isDark ? "rgba(55,138,221,.35)" : "rgba(0,0,0,.1)"}`,
+                                color: currentColor,
                               }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = "rgba(55,138,221,.2)"}
+                              onMouseEnter={(e) => e.currentTarget.style.background = isDark ? "rgba(55,138,221,.2)" : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.1)`}
                               onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                             >
                               <HiEye className="w-3.5 h-3.5" />
@@ -354,9 +365,9 @@ const ListPegawai = () => {
           {!isLoading && filtered.length > 0 && (
             <div
               className="flex items-center justify-between px-5 py-3.5 flex-wrap gap-3"
-              style={{ borderTop: "1px solid rgba(255,255,255,.06)" }}
+              style={{ borderTop: `1px solid ${isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.06)"}` }}
             >
-              <p className="text-xs" style={{ color: "rgba(255,255,255,.35)" }}>
+              <p className="text-xs" style={{ color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)" }}>
                 Menampilkan{" "}
                 {(currentPage - 1) * ITEMS_PER_PAGE + 1}–
                 {Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} dari{" "}
@@ -367,7 +378,7 @@ const ListPegawai = () => {
                   onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                   disabled={currentPage === 1}
                   className="w-8 h-8 rounded-lg text-xs flex items-center justify-center transition-all duration-150 disabled:opacity-30"
-                  style={{ border: "1px solid rgba(255,255,255,.12)", color: "rgba(255,255,255,.5)", background: "transparent" }}
+                  style={{ border: `1px solid ${isDark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.1)"}`, color: isDark ? "rgba(255,255,255,.5)" : "rgba(0,0,0,.5)", background: "transparent" }}
                 >
                   ‹
                 </button>
@@ -377,9 +388,9 @@ const ListPegawai = () => {
                     onClick={() => setCurrentPage(pg)}
                     className="w-8 h-8 rounded-lg text-xs flex items-center justify-center font-semibold transition-all duration-150"
                     style={{
-                      border: pg === currentPage ? "1px solid rgba(56,139,255,.7)" : "1px solid rgba(255,255,255,.12)",
-                      background: pg === currentPage ? "rgba(56,139,255,.3)" : "transparent",
-                      color: pg === currentPage ? "#60a5fa" : "rgba(255,255,255,.5)",
+                      border: pg === currentPage ? `1px solid ${currentColor}` : `1px solid ${isDark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.1)"}`,
+                      background: pg === currentPage ? `${currentColor}4d` : "transparent",
+                      color: pg === currentPage ? currentColor : isDark ? "rgba(255,255,255,.5)" : "rgba(0,0,0,.5)",
                     }}
                   >
                     {pg}
@@ -389,7 +400,7 @@ const ListPegawai = () => {
                   onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                   disabled={currentPage === totalPages}
                   className="w-8 h-8 rounded-lg text-xs flex items-center justify-center transition-all duration-150 disabled:opacity-30"
-                  style={{ border: "1px solid rgba(255,255,255,.12)", color: "rgba(255,255,255,.5)", background: "transparent" }}
+                  style={{ border: `1px solid ${isDark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.1)"}`, color: isDark ? "rgba(255,255,255,.5)" : "rgba(0,0,0,.5)", background: "transparent" }}
                 >
                   ›
                 </button>
@@ -403,13 +414,13 @@ const ListPegawai = () => {
       {confirmDelete && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
-          style={{ background: "rgba(0,0,0,.6)", backdropFilter: "blur(4px)" }}
+          style={{ background: isDark ? "rgba(0,0,0,.6)" : "rgba(0,0,0,.4)", backdropFilter: "blur(4px)" }}
         >
           <div
             className="w-full max-w-sm mx-4 rounded-2xl p-7 relative overflow-hidden"
             style={{
-              background: "rgba(4,12,36,.95)",
-              border: "1px solid rgba(220,38,38,.3)",
+              background: isDark ? "rgba(4,12,36,.95)" : "rgba(255,255,255,.95)",
+              border: `1px solid ${isDark ? "rgba(220,38,38,.3)" : "rgba(220,38,38,.2)"}`,
             }}
           >
             <div className="absolute top-0 left-0 right-0 h-px"
@@ -420,10 +431,12 @@ const ListPegawai = () => {
             >
               <HiTrash className="w-5 h-5 text-red-400" />
             </div>
-            <h3 className="text-white font-semibold text-center text-base mb-2">
+            <h3 className={`font-semibold text-center text-base mb-2 ${
+              isDark ? 'text-white' : 'text-gray-900'
+            }`}>
               Hapus Data Pegawai?
             </h3>
-            <p className="text-center text-sm mb-6" style={{ color: "rgba(255,255,255,.4)" }}>
+            <p className="text-center text-sm mb-6" style={{ color: isDark ? "rgba(255,255,255,.4)" : "rgba(0,0,0,.5)" }}>
               Tindakan ini tidak dapat dibatalkan. Data pegawai akan dihapus secara permanen.
             </p>
             <div className="flex gap-3">
@@ -431,9 +444,9 @@ const ListPegawai = () => {
                 onClick={() => setConfirmDelete(null)}
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150"
                 style={{
-                  background: "rgba(255,255,255,.06)",
-                  border: "1px solid rgba(255,255,255,.12)",
-                  color: "rgba(255,255,255,.7)",
+                  background: isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.05)",
+                  border: `1px solid ${isDark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.1)"}`,
+                  color: isDark ? "rgba(255,255,255,.7)" : "rgba(0,0,0,.6)",
                 }}
               >
                 Batal
