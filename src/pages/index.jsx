@@ -12,3 +12,4 @@ export { default as ListFisik } from './ListFisik';
 export { default as ListUkuran } from './ListUkuran';
 export { default as ListPasangan } from './ListPasangan';
 export { default as ListAnak } from './ListAnak';
+export { default as AddPegawai } from './AddPegawai';

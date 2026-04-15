@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { getMe } from "../features/authSlice";
 import {
   HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
@@ -17,8 +18,22 @@ const ListPegawai = () => {
   const [isLoading] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { currentColor, currentMode } = useStateContext();
   const isDark = currentMode === 'Dark';
+
+  useEffect(() => {
+    dispatch(getMe());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      console.log("berhasil");
+    } else {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const filtered = pegawai.filter(
     (p) =>
@@ -31,13 +46,6 @@ const ListPegawai = () => {
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
-
-  const getInitials = (nama) => {
-    const parts = nama.split(" ");
-    return parts.length > 1
-      ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : nama.substring(0, 2).toUpperCase();
-  };
 
   const getFullName = (p) =>
     `${p.gelar_depan ? p.gelar_depan + " " : ""}${p.nama}${
@@ -158,7 +166,7 @@ const ListPegawai = () => {
             </div>
             {/* Add Button */}
             <button
-              onClick={() => navigate("/pegawai/add")}
+              onClick={() => navigate("/add-pegawai")}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-88 hover:-translate-y-0.5"
               style={{
                 background: currentColor,

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import { Navbar, Footer, Sidebar, ThemeSettings } from "./components";
-import { Page404, LoginPage, Dashboard, ListPegawai, ListKepegawaian, ListPangkat, ListAlamat, ListIdentitas, ListRekening, ListPendidikan, ListFisik, ListUkuran, ListPasangan, ListAnak } from "./pages";
+import { Page404, LoginPage, Dashboard, ListPegawai, ListKepegawaian, ListPangkat, ListAlamat, ListIdentitas, ListRekening, ListPendidikan, ListFisik, ListUkuran, ListPasangan, ListAnak, AddPegawai } from "./pages";
 
 import { useStateContext } from "./contexts/ContextProvider";
 
@@ -78,7 +78,7 @@ const AppContent = () => {
               <Route path="/ukuran" element={<ListUkuran />} />
               <Route path="/pasangan" element={<ListPasangan />} />
               <Route path="/anak" element={<ListAnak />} />
-
+              <Route path="/add-pegawai" element={<AddPegawai />} />
               Portfolio Routes
 
               <Route path="/page-not-found" element={<Page404 />} />
