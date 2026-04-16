@@ -138,7 +138,7 @@ const ListKepegawaian = () => {
             </div>
             {/* Add Button */}
             <button
-              onClick={() => navigate("/kepegawaian/add")}
+              onClick={() => navigate("/add-kepegawaian")}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-88 hover:-translate-y-0.5"
               style={{
                 background: currentColor,

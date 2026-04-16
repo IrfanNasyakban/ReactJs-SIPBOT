@@ -36,7 +36,7 @@ const AddPegawai = () => {
     if (token) {
       console.log("berhasil");
     } else {
-      navigate("/login");
+      navigate("/");
     }
   }, [navigate]);
 
@@ -481,8 +481,8 @@ const AddPegawai = () => {
                       required
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
-                        background: isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+                        background: isDark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
                       }}
                       value={agama}
@@ -490,21 +490,21 @@ const AddPegawai = () => {
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
                           : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
                       }}
                       onBlur={(e) => {
-                        e.target.style.borderColor = isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)";
+                        e.target.style.borderColor = isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.03)";
                       }}
                     >
-                      <option value="">🕌 Pilih Agama</option>
-                      <option value="Islam">Islam</option>
-                      <option value="Kristen Protestan">Kristen Protestan</option>
-                      <option value="Katolik">Katolik</option>
-                      <option value="Hindu">Hindu</option>
-                      <option value="Buddha">Buddha</option>
-                      <option value="Khonghucu">Khonghucu</option>
+                      <option value="" style={{color: "black"}}>🕌 Pilih Agama</option>
+                      <option value="Islam" style={{color: "black"}}>Islam</option>
+                      <option value="Kristen Protestan" style={{color: "black"}}>Kristen Protestan</option>
+                      <option value="Katolik" style={{color: "black"}}>Katolik</option>
+                      <option value="Hindu" style={{color: "black"}}>Hindu</option>
+                      <option value="Buddha" style={{color: "black"}}>Buddha</option>
+                      <option value="Khonghucu" style={{color: "black"}}>Khonghucu</option>
                     </select>
                   </div>
                 </div>
@@ -726,9 +726,9 @@ const AddPegawai = () => {
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
                         background: isDark
-                          ? "rgba(255,255,255,.05)"
+                          ? "rgba(255,255,255,.12)"
                           : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
                       }}
                       value={statusPegawai === "" ? "" : statusPegawai.toString()}
@@ -738,21 +738,21 @@ const AddPegawai = () => {
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
                           : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
                       }}
                       onBlur={(e) => {
                         e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
+                          ? "rgba(255,255,255,.15)"
                           : "rgba(0,0,0,.1)";
                         e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
+                          ? "rgba(255,255,255,.12)"
                           : "rgba(0,0,0,.03)";
                       }}
                     >
-                      <option value="">-- Pilih Status Pegawai --</option>
-                      <option value="true">Aktif</option>
-                      <option value="false">Tidak Aktif</option>
+                      <option value="" style={{color: "black"}}>-- Pilih Status Pegawai --</option>
+                      <option value="true" style={{color: "black"}}>Aktif</option>
+                      <option value="false" style={{color: "black"}}>Tidak Aktif</option>
                     </select>
                   </div>
                 </div>

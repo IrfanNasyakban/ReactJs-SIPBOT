@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import { Navbar, Footer, Sidebar, ThemeSettings } from "./components";
-import { Page404, LoginPage, Dashboard, ListPegawai, ListKepegawaian, ListPangkat, ListAlamat, ListIdentitas, ListRekening, ListPendidikan, ListFisik, ListUkuran, ListPasangan, ListAnak, AddPegawai } from "./pages";
+import { Page404, LoginPage, Dashboard, ListPegawai, ListKepegawaian, ListPangkat, ListAlamat, ListIdentitas, ListRekening, ListPendidikan, ListFisik, ListUkuran, ListPasangan, ListAnak, AddPegawai, AddKepegawaian, AddPangkat, AddAlamat, AddIdentitas, AddRekening, AddPendidikan, AddFisik } from "./pages";
 
 import { useStateContext } from "./contexts/ContextProvider";
 
@@ -79,6 +79,13 @@ const AppContent = () => {
               <Route path="/pasangan" element={<ListPasangan />} />
               <Route path="/anak" element={<ListAnak />} />
               <Route path="/add-pegawai" element={<AddPegawai />} />
+              <Route path="/add-kepegawaian" element={<AddKepegawaian />} />
+              <Route path="/add-pangkat" element={<AddPangkat />} />
+              <Route path="/add-alamat" element={<AddAlamat />} />
+              <Route path="/add-identitas" element={<AddIdentitas />} />
+              <Route path="/add-rekening" element={<AddRekening />} />
+              <Route path="/add-pendidikan" element={<AddPendidikan />} />
+              <Route path="/add-fisik" element={<AddFisik />} />
               Portfolio Routes
 
               <Route path="/page-not-found" element={<Page404 />} />
