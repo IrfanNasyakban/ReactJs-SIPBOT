@@ -20,3 +20,5 @@ export { default as AddIdentitas } from './AddIdentitas';
 export { default as AddRekening } from './AddRekening';
 export { default as AddPendidikan } from './AddPendidikan';
 export { default as AddFisik } from './AddFisik';
+export { default as AddUkuran } from './AddUkuran';
+export { default as AddPasangan } from './AddPasangan';

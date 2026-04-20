@@ -1,26 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import { useDispatch } from "react-redux";
+import { getMe } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
 import {
   HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
-import { dummyRekening } from "../data/dummy";
 
 const ITEMS_PER_PAGE = 10;
 
 const ListRekening = () => {
+  const [rekening, setRekening] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [rekening] = useState(dummyRekening);
   const [isLoading] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { currentColor, currentMode } = useStateContext();
   const isDark = currentMode === 'Dark';
 
+  useEffect(() => {
+      dispatch(getMe());
+    }, [dispatch]);
+  
+    useEffect(() => {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        getRekening();
+      } else {
+        navigate("/");
+      }
+    }, [navigate]);
+  
+    const getRekening = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = process.env.REACT_APP_URL_API;
+  
+        const response = await axios.get(`${apiUrl}/rekening`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        if (response.data) {
+          setRekening(response.data);
+        } else {
+          setRekening([]);
+        }
+        console.log(response.data);
+        
+      } catch (err) {
+        console.error('Error fetching rekening:', err);
+        setRekening([]);
+      }
+    };
+
   const filtered = rekening.filter(
-    (r) => r.nama.toLowerCase().includes(search.toLowerCase()) ||
+    (r) => r.pegawai?.namaDenganGelar?.toLowerCase().includes(search.toLowerCase()) ||
            r.nomor_rek_gaji.includes(search) ||
            r.nama_bank.toLowerCase().includes(search.toLowerCase())
   );
@@ -193,7 +231,7 @@ const ListRekening = () => {
                   ) : (
                     paginated.map((r, i) => (
                       <tr
-                        key={r.uuid}
+                        key={r.id}
                         style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"}` }}
                         className={`transition-colors duration-150 ${isDark ? 'hover:bg-blue-500/5' : 'hover:bg-gray-100/30'}`}
                       >
@@ -207,20 +245,20 @@ const ListRekening = () => {
                           <span className={`text-sm font-semibold ${
                             isDark ? 'text-white' : 'text-gray-900'
                           }`}>
-                            {r.nama}
+                            {r.pegawai?.namaDenganGelar}
                           </span>
                         </td>
                         {/* Nomor Rek Gaji */}
                         <td className="px-4 py-3 text-sm font-mono" style={{ color: currentColor }}>
-                          {formatRekening(r.nomor_rek_gaji)}
+                          {formatRekening(r.nomorRekGaji)}
                         </td>
                         {/* Nama Bank */}
                         <td className="px-4 py-3 text-sm font-semibold" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {r.nama_bank}
+                          {r.namaBank}
                         </td>
                         {/* Kantor Cabang */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {r.nama_kantor_cabang}
+                          {r.kantorCabang}
                         </td>
                         {/* Aksi */}
                         <td className="px-4 py-3">

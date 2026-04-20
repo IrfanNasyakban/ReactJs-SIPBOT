@@ -1,27 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { getMe } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
 import {
   HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
-import { dummyPasangan } from "../data/dummy";
 
 const ITEMS_PER_PAGE = 10;
 
 const ListPasangan = () => {
+  const [pasangan, setPasangan] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [pasangan] = useState(dummyPasangan);
   const [isLoading] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { currentColor, currentMode } = useStateContext();
   const isDark = currentMode === 'Dark';
 
-  const filtered = pasangan.filter(
-    (p) => p.nama.toLowerCase().includes(search.toLowerCase()) ||
-           p.nama_pasangan.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    dispatch(getMe());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      getPasangan();
+    } else {
+      navigate("/");
+    }
+  }, [navigate]);
+
+  const getPasangan = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const apiUrl = process.env.REACT_APP_URL_API;
+
+      const response = await axios.get(`${apiUrl}/pasangan`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data) {
+        setPasangan(response.data);
+      } else {
+        setPasangan([]);
+      }
+      console.log(response.data);
+    } catch (err) {
+      console.error("Error fetching Pasangan:", err);
+      setPasangan([]);
+    }
+  };
+
+  const filtered = pasangan.filter((p) =>
+    p.pegawai?.namaDenganGelar?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -114,7 +150,7 @@ const ListPasangan = () => {
             </div>
             {/* Add Button */}
             <button
-              onClick={() => navigate("/pasangan/add")}
+              onClick={() => navigate("/add-pasangan")}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-88 hover:-translate-y-0.5"
               style={{
                 background: currentColor,
@@ -187,7 +223,7 @@ const ListPasangan = () => {
                   ) : (
                     paginated.map((p, i) => (
                       <tr
-                        key={p.uuid}
+                        key={p.id}
                         style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"}` }}
                         className={`transition-colors duration-150 ${isDark ? 'hover:bg-blue-500/5' : 'hover:bg-gray-100/30'}`}
                       >
@@ -201,21 +237,21 @@ const ListPasangan = () => {
                           <span className={`text-sm font-semibold ${
                             isDark ? 'text-white' : 'text-gray-900'
                           }`}>
-                            {p.nama}
+                            {p.pegawai?.namaDenganGelar}
                           </span>
                         </td>
                         {/* Nama Pasangan */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
                           <span style={{ color: currentColor, fontWeight: 600 }}>
-                            {p.nama_pasangan}
+                            {p.namaPasangan}
                           </span>
                         </td>
                         {/* Aksi */}
                         <td className="px-4 py-3">
-                          <div className="flex items-center justify-center gap-1.5">
+                          <div className="flex items-center justify-left gap-1.5">
                             {/* View */}
                             <button
-                              onClick={() => navigate(`/pasangan/${p.uuid}`)}
+                              onClick={() => navigate(`/pasangan/${p.id}`)}
                               title="Lihat Detail"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{

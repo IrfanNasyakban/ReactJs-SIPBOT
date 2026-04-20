@@ -1,26 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import { useDispatch } from "react-redux";
+import { getMe } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
 import {
   HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
-import { dummyKepegawaian } from "../data/dummy";
 
 const ITEMS_PER_PAGE = 10;
 
 const ListKepegawaian = () => {
+  const [kepegawaian, setKepegawaian] = useState([]);
+
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [kepegawaian] = useState(dummyKepegawaian);
   const [isLoading] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { currentColor, currentMode } = useStateContext();
   const isDark = currentMode === 'Dark';
 
+  useEffect(() => {
+      dispatch(getMe());
+    }, [dispatch]);
+  
+    useEffect(() => {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        getKepegawaian();
+      } else {
+        navigate("/");
+      }
+    }, [navigate]);
+  
+    const getKepegawaian = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = process.env.REACT_APP_URL_API;
+  
+        const response = await axios.get(`${apiUrl}/kepegawaian`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        if (response.data) {
+          setKepegawaian(response.data);
+        } else {
+          setKepegawaian([]);
+        }
+        console.log(response.data);
+        
+      } catch (err) {
+        console.error('Error fetching kepegawaian:', err);
+        setKepegawaian([]);
+      }
+    };
+
   const filtered = kepegawaian.filter(
-    (k) => k.nama.toLowerCase().includes(search.toLowerCase())
+    (k) => k.pegawai?.namaDenganGelar?.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -212,7 +251,7 @@ const ListKepegawaian = () => {
                   ) : (
                     paginated.map((k, i) => (
                       <tr
-                        key={k.uuid}
+                        key={k.id}
                         style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"}` }}
                         className={`transition-colors duration-150 ${isDark ? 'hover:bg-blue-500/5' : 'hover:bg-gray-100/30'}`}
                       >
@@ -226,18 +265,18 @@ const ListKepegawaian = () => {
                           <span className={`text-sm font-semibold ${
                             isDark ? 'text-white' : 'text-gray-900'
                           }`}>
-                            {k.nama}
+                            {k.pegawai?.namaDenganGelar || k.nama}
                           </span>
                         </td>
                         {/* Status */}
-                        <td className="px-4 py-3">{statusBadge(k.status)}</td>
+                        <td className="px-4 py-3">{statusBadge(k.statusKepegawaian)}</td>
                         {/* Jabatan */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
                           {k.jabatan}
                         </td>
                         {/* Bagian Kerja */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {k.bagian_kerja}
+                          {k.bagianKerja}
                         </td>
                         {/* Eselon */}
                         <td className="px-4 py-3 text-sm font-semibold" style={{ color: currentColor }}>
@@ -245,24 +284,24 @@ const ListKepegawaian = () => {
                         </td>
                         {/* Angkatan PEJIM */}
                         <td className="px-4 py-3 text-sm text-center" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {k.angkatan_pejim === "-" ? <span style={{ color: isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.3)" }}>—</span> : k.angkatan_pejim}
+                          {k.angkatanPejim === "-" ? <span style={{ color: isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.3)" }}>—</span> : k.angkatanPejim}
                         </td>
                         {/* PPNS */}
                         <td className="px-4 py-3 text-sm font-semibold">
-                          <span style={{ color: k.ppns === "Ya" ? "#10b981" : isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.3)" }}>
-                            {k.ppns}
+                          <span style={{ color: k.ppns === "Ya" || k.ppns === "1" ? "#10b981" : isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.3)" }}>
+                            {k.ppns === "Ya" || k.ppns === "1" ? "Ya" : "Tidak"}
                           </span>
                         </td>
                         {/* TMT Pensiun */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {k.tmt_pensiun === "-" ? <span style={{ color: isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.3)" }}>—</span> : new Date(k.tmt_pensiun).toLocaleDateString('id-ID')}
+                          {k.tmtPensiun === "-" ? <span style={{ color: isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.3)" }}>—</span> : new Date(k.tmtPensiun).toLocaleDateString('id-ID')}
                         </td>
                         {/* Aksi */}
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-center gap-1.5">
                             {/* View */}
                             <button
-                              onClick={() => navigate(`/kepegawaian/${k.uuid}`)}
+                              onClick={() => navigate(`/kepegawaian/${k.id}`)}
                               title="Lihat Detail"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{
@@ -277,7 +316,7 @@ const ListKepegawaian = () => {
                             </button>
                             {/* Edit */}
                             <button
-                              onClick={() => navigate(`/kepegawaian/edit/${k.uuid}`)}
+                              onClick={() => navigate(`/kepegawaian/edit/${k.id}`)}
                               title="Edit"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{
@@ -292,7 +331,7 @@ const ListKepegawaian = () => {
                             </button>
                             {/* Delete */}
                             <button
-                              onClick={() => setConfirmDelete(k.uuid)}
+                              onClick={() => setConfirmDelete(k.id)}
                               title="Hapus"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{

@@ -6,11 +6,8 @@ import { getMe } from "../features/authSlice";
 import { useStateContext } from "../contexts/ContextProvider";
 import { HiArrowLeft } from "react-icons/hi";
 
-const AddIdentitas = () => {
-  const [nik, setNik] = useState("");
-  const [nomorKK, setNomorKK] = useState("");
-  const [nomorBPJS, setNomorBPJS] = useState("");
-  const [nomorTaspen, setNomorTaspen] = useState("");
+const AddAnak = () => {
+  const [namaAnak, setNamaAnak] = useState("");
 
   const [idPegawai, setIdPegawai] = useState("");
   const [pegawai, setPegawai] = useState([]);
@@ -41,17 +38,17 @@ const AddIdentitas = () => {
       const token = localStorage.getItem("accessToken");
       const apiUrl = process.env.REACT_APP_URL_API;
 
-      const [pegawaiResponse, identitasResponse] = await Promise.all([
+      const [pegawaiResponse, anakResponse] = await Promise.all([
         axios.get(`${apiUrl}/pegawai`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get(`${apiUrl}/identitas`, {
+        axios.get(`${apiUrl}/anak`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
 
       const existingIds = new Set(
-        (identitasResponse.data || []).map((item) => item.idPegawai),
+        (anakResponse.data || []).map((item) => item.idPegawai),
       );
 
       const availablePegawai = (pegawaiResponse.data || []).filter(
@@ -67,22 +64,19 @@ const AddIdentitas = () => {
     }
   };
 
-  const saveIdentitas = async (e) => {
+  const saveAnak = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     const jsonData = {
       idPegawai,
-      nik,
-      nomorKK,
-      nomorBPJS,
-      nomorTaspen,
+      namaAnak,
     };
 
     try {
       const token = localStorage.getItem("accessToken");
       const response = await axios.post(
-        "http://localhost:5000/identitas",
+        "http://localhost:5000/anak",
         jsonData,
         {
           headers: {
@@ -93,7 +87,7 @@ const AddIdentitas = () => {
       );
       console.log("Response dari Server:", response);
       setLoading(false);
-      navigate("/identitas");
+      navigate("/anak");
     } catch (error) {
       setLoading(false);
       console.error(
@@ -118,9 +112,9 @@ const AddIdentitas = () => {
         className="fixed inset-0 pointer-events-none z-0"
         style={{
           backgroundImage: `
-                        linear-gradient(${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px),
-                        linear-gradient(90deg, ${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px)
-                      `,
+                                linear-gradient(${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px),
+                                linear-gradient(90deg, ${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px)
+                              `,
           backgroundSize: "48px 48px",
         }}
       />
@@ -179,7 +173,7 @@ const AddIdentitas = () => {
                 }`}
               >
                 Tambah Data{" "}
-                <span style={{ color: currentColor }}>Identitas</span>
+                <span style={{ color: currentColor }}>Pasangan</span>
               </h1>
             </div>
             <p
@@ -188,14 +182,14 @@ const AddIdentitas = () => {
                 color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)",
               }}
             >
-              Formulir Penambahan Data Identitas Baru - Kantor Imigrasi Kelas II
-              TPI Lhokseumawe
+              Formulir Penambahan Data Anak Pegawai - Kantor Imigrasi Kelas
+              II TPI Lhokseumawe
             </p>
           </div>
         </div>
 
         {/* Form Card */}
-        <form onSubmit={saveIdentitas}>
+        <form onSubmit={saveAnak}>
           <div
             className="rounded-2xl overflow-hidden"
             style={{
@@ -305,7 +299,7 @@ const AddIdentitas = () => {
                 </div>
               </div>
 
-              {/* ── Section 1: Data Identitas Kependudukan ── */}
+              {/* ── Section 1: Data Anak ── */}
               <div className="mb-8">
                 <div
                   className="pb-4 border-b"
@@ -319,13 +313,13 @@ const AddIdentitas = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">👤</span>
-                    Data Identitas Kependudukan
+                    <span className="text-xl">📏</span>
+                    Data Anak
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* NIK (Nomor Induk Kependudukan) */}
+                <div className="gap-6 mt-6">
+                  {/* Nama Anak */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -335,14 +329,13 @@ const AddIdentitas = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      NIK (Nomor Induk Kependudukan){" "}
-                      <span style={{ color: "#ef4444" }}>*</span>
+                      Nama Anak <span style={{ color: "#ef4444" }}>*</span>
                     </label>
                     <input
-                      name="nik"
+                      name="namaAnak"
                       type="text"
                       required
-                      placeholder="16 digit angka"
+                      placeholder="Contoh: Ahmad Sulaiman, S.E. atau (-) jika belum menikah"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
                         background: isDark
@@ -351,164 +344,8 @@ const AddIdentitas = () => {
                         border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
                       }}
-                      value={nik}
-                      onChange={(e) => setNik(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* Nomor KK (Kartu Keluarga) */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Nomor KK (Kartu Keluarga){" "}
-                      <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="nomorKK"
-                      type="text"
-                      required
-                      placeholder="16 digit angka"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={nomorKK}
-                      onChange={(e) => setNomorKK(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Section 2: Data Kepesertaan Asuransi & Pensiun ── */}
-              <div className="mb-8">
-                <div
-                  className="pb-4 border-b"
-                  style={{
-                    borderColor: isDark
-                      ? "rgba(56,139,255,.2)"
-                      : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.2)`,
-                  }}
-                >
-                  <h2
-                    className="text-lg font-bold flex items-center gap-2"
-                    style={{ color: currentColor }}
-                  >
-                    <span className="text-xl">📞</span>
-                    Data Kepesertaan Asuransi & Pensiun
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* Nomor BPJS Kesehatan */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Nomor BPJS Kesehatan{" "}
-                      <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="nomorBPJS"
-                      type="text"
-                      required
-                      placeholder="13 digit angka"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={nomorBPJS}
-                      onChange={(e) => setNomorBPJS(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* Nomor TASPEN */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Nomor TASPEN <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="nomorTASPEN"
-                      type="text"
-                      required
-                      placeholder="Nomor TASPEN"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={nomorTaspen}
-                      onChange={(e) => setNomorTaspen(e.target.value)}
+                      value={namaAnak}
+                      onChange={(e) => setNamaAnak(e.target.value)}
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
@@ -595,4 +432,4 @@ const AddIdentitas = () => {
   );
 };
 
-export default AddIdentitas;
+export default AddAnak;

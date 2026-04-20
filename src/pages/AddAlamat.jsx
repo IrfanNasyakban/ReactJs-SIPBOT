@@ -11,6 +11,9 @@ const AddAlamat = () => {
     const [alamatDomisili, setAlamatDomisili] = useState("");
     const [alamatSamaDenganKTP, setAlamatSamaDenganKTP] = useState(false);
 
+    const [idPegawai, setIdPegawai] = useState("");
+    const [pegawai, setPegawai] = useState([]);
+
     const [loading, setLoading] = useState(false);
       const { currentColor, currentMode } = useStateContext();
       const isDark = currentMode === "Dark";
@@ -25,17 +28,50 @@ const AddAlamat = () => {
       useEffect(() => {
         const token = localStorage.getItem("accessToken");
         if (token) {
-          console.log("berhasil");
+          getPegawai();
         } else {
           navigate("/");
         }
       }, [navigate]);
+
+  const getPegawai = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("accessToken");
+      const apiUrl = process.env.REACT_APP_URL_API;
+
+      const [pegawaiResponse, alamatResponse] = await Promise.all([
+        axios.get(`${apiUrl}/pegawai`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axios.get(`${apiUrl}/alamat`, {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      const existingIds = new Set(
+        (alamatResponse.data || []).map((item) => item.idPegawai),
+      );
+
+      const availablePegawai = (pegawaiResponse.data || []).filter(
+        (item) => !existingIds.has(item.id),
+      );
+
+      setPegawai(availablePegawai);
+    } catch (err) {
+      console.error("Error fetching pegawai:", err);
+      setPegawai([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const saveAlamat = async (e) => {
     e.preventDefault();
     setLoading(true);
     
     const jsonData = {
+      idPegawai,
       alamatKTP,
       alamatDomisili
     };
@@ -165,6 +201,96 @@ const AddAlamat = () => {
                         />
             
                         <div className="p-8">
+                          {/* ── Section 0: Pilih Pegawai ── */}
+              <div className="mb-8">
+                <div
+                  className="pb-4 border-b"
+                  style={{
+                    borderColor: isDark
+                      ? "rgba(56,139,255,.2)"
+                      : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.2)`,
+                  }}
+                >
+                  <h2
+                    className="text-lg font-bold flex items-center gap-2"
+                    style={{ color: currentColor }}
+                  >
+                    <span className="text-xl">👤</span>
+                    Pilih Pegawai
+                  </h2>
+                  <p
+                    className="text-xs mt-1"
+                    style={{
+                      color: isDark
+                        ? "rgba(255,255,255,.35)"
+                        : "rgba(0,0,0,.5)",
+                    }}
+                  >
+                    Nama Pegawai
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6 mt-6">
+                  {/* Nama Pegawai */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      Nama Pegawai <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <select
+                      name="namaPegawai"
+                      required
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={idPegawai === "" ? "" : idPegawai.toString()}
+                      onChange={(e) => setIdPegawai(e.target.value)}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.15)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                      disabled={pegawai.length === 0}
+                    >
+                      <option value="" disabled style={{ color: "black" }}>
+                        {pegawai.length > 0
+                          ? "-- Pilih Nama Pegawai --"
+                          : "Tidak ada pegawai tanpa data kepegawaian"}
+                      </option>
+                      {pegawai.map((item) => (
+                        <option
+                          key={item.id}
+                          value={item.id}
+                          style={{ color: "black" }}
+                        >
+                          {item.namaDenganGelar || item.nama}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
                           {/* ── Section 1: Data Alamat Lengkap ── */}
                           <div className="mb-8">
                             <div

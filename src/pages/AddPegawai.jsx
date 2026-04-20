@@ -11,6 +11,7 @@ const AddPegawai = () => {
   const [nama, setNama] = useState("");
   const [gelarDepan, setGelarDepan] = useState("");
   const [gelarBelakang, setGelarBelakang] = useState("");
+  const [namaDenganGelar, setNamaDenganGelar] = useState("");
   const [tempatLahir, setTempatLahir] = useState("");
   const [tanggalLahir, setTanggalLahir] = useState("");
   const [gender, setGender] = useState("");
@@ -40,6 +41,14 @@ const AddPegawai = () => {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    const formattedName = [gelarDepan.trim(), `${nama.trim()},`, gelarBelakang.trim()]
+      .filter(Boolean)
+      .join(" ");
+
+    setNamaDenganGelar(formattedName);
+  }, [gelarDepan, nama, gelarBelakang]);
+
   const savePegawai = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -49,6 +58,7 @@ const AddPegawai = () => {
       nama,
       gelarDepan,
       gelarBelakang,
+      namaDenganGelar,
       tempatLahir,
       tanggalLahir,
       gender,
@@ -346,6 +356,28 @@ const AddPegawai = () => {
                         e.target.style.borderColor = isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)";
                         e.target.style.background = isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)";
                       }}
+                    />
+                  </div>
+
+                  {/* Nama Dengan Gelar */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{ color: isDark ? "rgba(255,255,255,.8)" : "rgba(0,0,0,.7)" }}
+                    >
+                      Nama Dengan Gelar
+                    </label>
+                    <input
+                      name="namaDenganGelar"
+                      type="text"
+                      readOnly
+                      className="w-full px-4 py-2.5 rounded-xl text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 transition-all duration-200"
+                      style={{
+                        background: isDark ? "rgba(255,255,255,.05)" : "rgba(243,244,246,.9)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={namaDenganGelar}
                     />
                   </div>
 

@@ -1,27 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import { useDispatch } from "react-redux";
+import { getMe } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
 import {
   HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
-import { dummyPendidikan } from "../data/dummy";
 
 const ITEMS_PER_PAGE = 10;
 
 const ListPendidikan = () => {
+  const [pendidikan, setPendidikan] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [pendidikan] = useState(dummyPendidikan);
   const [isLoading] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { currentColor, currentMode } = useStateContext();
   const isDark = currentMode === 'Dark';
 
+  useEffect(() => {
+      dispatch(getMe());
+    }, [dispatch]);
+  
+    useEffect(() => {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        getPendidikan();
+      } else {
+        navigate("/");
+      }
+    }, [navigate]);
+  
+    const getPendidikan = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = process.env.REACT_APP_URL_API;
+  
+        const response = await axios.get(`${apiUrl}/pendidikan`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        if (response.data) {
+          setPendidikan(response.data);
+        } else {
+          setPendidikan([]);
+        }
+        console.log(response.data);
+        
+      } catch (err) {
+        console.error('Error fetching pendidikan:', err);
+        setPendidikan([]);
+      }
+    };
+
   const filtered = pendidikan.filter(
-    (p) => p.nama.toLowerCase().includes(search.toLowerCase()) ||
-           p.pendidikan_terakhir.toLowerCase().includes(search.toLowerCase())
+    (p) => p.pegawai?.namaDenganGelar?.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -187,7 +224,7 @@ const ListPendidikan = () => {
                   ) : (
                     paginated.map((p, i) => (
                       <tr
-                        key={p.uuid}
+                        key={p.id}
                         style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"}` }}
                         className={`transition-colors duration-150 ${isDark ? 'hover:bg-blue-500/5' : 'hover:bg-gray-100/30'}`}
                       >
@@ -201,13 +238,13 @@ const ListPendidikan = () => {
                           <span className={`text-sm font-semibold ${
                             isDark ? 'text-white' : 'text-gray-900'
                           }`}>
-                            {p.nama}
+                            {p.pegawai?.namaDenganGelar}
                           </span>
                         </td>
                         {/* Pendidikan Terakhir */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          <div className="max-w-xs" title={p.pendidikan_terakhir}>
-                            {p.pendidikan_terakhir}
+                          <div className="max-w-xs" title={p.pendidikanTerakhir}>
+                            {p.pendidikanTerakhir}
                           </div>
                         </td>
                         {/* Aksi */}

@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import axios from 'axios';
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../features/authSlice";
 import {
   HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
-import { dummyPegawai } from "../data/dummy";
 
 const ITEMS_PER_PAGE = 10;
 
 const ListPegawai = () => {
+  const [pegawai, setPegawai] = useState([]);
+
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [pegawai] = useState(dummyPegawai);
   const [isLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -29,57 +30,60 @@ const ListPegawai = () => {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
-      console.log("berhasil");
+      getPegawai();
     } else {
-      navigate("/login");
+      navigate("/");
     }
   }, [navigate]);
 
-  const filtered = pegawai.filter(
-    (p) =>
-      p.nama.toLowerCase().includes(search.toLowerCase()) ||
-      p.nip.includes(search)
-  );
+  const getPegawai = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const apiUrl = process.env.REACT_APP_URL_API;
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice(
+      const response = await axios.get(`${apiUrl}/pegawai`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.data) {
+        setPegawai(response.data);
+      } else {
+        setPegawai([]);
+      }
+      console.log(response.data);
+      
+    } catch (err) {
+      console.error('Error fetching pegawai:', err);
+      setPegawai([]);
+    }
+  };
+
+  const totalPages = Math.ceil(pegawai?.length / ITEMS_PER_PAGE);
+  const paginated = pegawai?.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
-  const getFullName = (p) =>
-    `${p.gelar_depan ? p.gelar_depan + " " : ""}${p.nama}${
-      p.gelar_belakang ? ", " + p.gelar_belakang : ""
-    }`;
-
   const statusBadge = (status) => {
+    const isActive = status === true || status === "true";
     const mapDark = {
-      PNS: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
-      PPPK: "bg-blue-500/10 text-blue-400 border-blue-500/30",
-      Honorer: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+      true: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+      false: "bg-red-500/10 text-red-400 border-red-500/30",
     };
     const mapLight = {
-      PNS: "bg-emerald-500/15 text-emerald-600 border-emerald-500/40",
-      PPPK: "bg-blue-500/15 text-blue-600 border-blue-500/40",
-      Honorer: "bg-amber-500/15 text-amber-600 border-amber-500/40",
+      true: "bg-emerald-500/15 text-emerald-600 border-emerald-500/40",
+      false: "bg-red-500/15 text-red-600 border-red-500/40",
     };
     const map = isDark ? mapDark : mapLight;
     return (
       <span
         className={`inline-block px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-          map[status] || isDark ? "bg-white/5 text-white/50 border-white/10" : "bg-black/5 text-black/50 border-black/10"
+          map[isActive] || isDark ? "bg-white/5 text-white/50 border-white/10" : "bg-black/5 text-black/50 border-black/10"
         }`}
       >
-        {status}
+        {isActive ? "Aktif" : "Tidak Aktif"}
       </span>
     );
-  };
-
-  const statCounts = {
-    total: pegawai.length,
-    pns: pegawai.filter((p) => p.status_pegawai === "PNS").length,
-    pppk: pegawai.filter((p) => p.status_pegawai === "PPPK").length,
-    honorer: pegawai.filter((p) => p.status_pegawai === "Honorer").length,
   };
 
   const handleDelete = (id) => {
@@ -231,7 +235,18 @@ const ListPegawai = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginated.length === 0 ? (
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={15} className="text-center py-16">
+                        <div className="flex items-center justify-center">
+                          <div
+                            className="w-8 h-8 rounded-full border-2 animate-spin"
+                            style={{ borderColor: "rgba(255,255,255,.1)", borderTopColor: "#60a5fa" }}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ) : paginated.length === 0 ? (
                     <tr>
                       <td colSpan={15} className="text-center py-16"
                           style={{ color: isDark ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.3)", fontSize: 14 }}>
@@ -241,7 +256,7 @@ const ListPegawai = () => {
                   ) : (
                     paginated.map((p, i) => (
                       <tr
-                        key={p.uuid}
+                        key={p.id}
                         style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"}` }}
                         className={`transition-colors duration-150 ${isDark ? 'hover:bg-blue-500/5' : 'hover:bg-gray-100/30'}`}
                       >
@@ -266,24 +281,24 @@ const ListPegawai = () => {
                         </td>
                         {/* Gelar Depan */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {p.gelar_depan || <span style={{ color: isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)" }}>—</span>}
+                          {p.gelarDepan || <span style={{ color: isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)" }}>—</span>}
                         </td>
                         {/* Gelar Belakang */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {p.gelar_belakang || <span style={{ color: isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)" }}>—</span>}
+                          {p.gelarBelakang || <span style={{ color: isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.2)" }}>—</span>}
                         </td>
                         {/* Nama + Gelar */}
                         <td className="px-4 py-3 text-xs whitespace-nowrap"
                             style={{ color: isDark ? "#c7d8f8" : "rgba(0,0,0,.7)" }}>
-                          {getFullName(p)}
+                          {p.namaDenganGelar}
                         </td>
                         {/* Tempat Lahir */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {p.tempat_lahir}
+                          {p.tempatLahir}
                         </td>
                         {/* Gender */}
                         <td className="px-4 py-3 text-sm font-semibold">
-                          <span style={{ color: p.gender === "L" ? currentColor : "#f472b6" }}>
+                          <span style={{ color: p.gender === "Laki-Laki" ? currentColor : "#f472b6" }}>
                             {p.gender}
                           </span>
                         </td>
@@ -292,20 +307,20 @@ const ListPegawai = () => {
                           {p.agama}
                         </td>
                         {/* Status */}
-                        <td className="px-4 py-3">{statusBadge(p.status_pegawai)}</td>
+                        <td className="px-4 py-3">{statusBadge(p.statusPegawai)}</td>
                         {/* Email Pribadi */}
                         <td className="px-4 py-3 text-xs whitespace-nowrap"
                             style={{ color: isDark ? "rgba(180,210,255,.7)" : "rgba(0,0,0,.6)" }}>
-                          {p.email_pribadi}
+                          {p.emailPribadi}
                         </td>
                         {/* Email Dinas */}
                         <td className="px-4 py-3 text-xs whitespace-nowrap"
                             style={{ color: isDark ? "rgba(180,210,255,.7)" : "rgba(0,0,0,.6)" }}>
-                          {p.email_dinas}
+                          {p.emailDinas}
                         </td>
                         {/* No Telp */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {p.no_telp}
+                          {p.noHp}
                         </td>
                         {/* Hobi */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(255,255,255,.45)" : "rgba(0,0,0,.5)" }}>
@@ -316,7 +331,7 @@ const ListPegawai = () => {
                           <div className="flex items-center justify-center gap-1.5">
                             {/* View */}
                             <button
-                              onClick={() => navigate(`/pegawai/${p.uuid}`)}
+                              onClick={() => navigate(`/pegawai/${p.id}`)}
                               title="Lihat Detail"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{
@@ -331,7 +346,7 @@ const ListPegawai = () => {
                             </button>
                             {/* Edit */}
                             <button
-                              onClick={() => navigate(`/pegawai/edit/${p.uuid}`)}
+                              onClick={() => navigate(`/pegawai/edit/${p.id}`)}
                               title="Edit"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{
@@ -346,7 +361,7 @@ const ListPegawai = () => {
                             </button>
                             {/* Delete */}
                             <button
-                              onClick={() => setConfirmDelete(p.uuid)}
+                              onClick={() => setConfirmDelete(p.id)}
                               title="Hapus"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{
@@ -370,7 +385,7 @@ const ListPegawai = () => {
           )}
 
           {/* Pagination */}
-          {!isLoading && filtered.length > 0 && (
+          {!isLoading && pegawai.length > 0 && (
             <div
               className="flex items-center justify-between px-5 py-3.5 flex-wrap gap-3"
               style={{ borderTop: `1px solid ${isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.06)"}` }}
@@ -378,8 +393,8 @@ const ListPegawai = () => {
               <p className="text-xs" style={{ color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)" }}>
                 Menampilkan{" "}
                 {(currentPage - 1) * ITEMS_PER_PAGE + 1}–
-                {Math.min(currentPage * ITEMS_PER_PAGE, filtered.length)} dari{" "}
-                {filtered.length} data
+                {Math.min(currentPage * ITEMS_PER_PAGE, pegawai.length)} dari{" "}
+                {pegawai.length} data
               </p>
               <div className="flex gap-1.5">
                 <button

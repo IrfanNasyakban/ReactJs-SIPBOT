@@ -1,28 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { getMe } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
 import {
   HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
-import { dummyFisik } from "../data/dummy";
 
 const ITEMS_PER_PAGE = 10;
 
 const ListFisik = () => {
+  const [fisik, setFisik] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [fisik] = useState(dummyFisik);
   const [isLoading] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { currentColor, currentMode } = useStateContext();
   const isDark = currentMode === 'Dark';
 
-  const filtered = fisik.filter(
-    (f) => f.nama.toLowerCase().includes(search.toLowerCase()) ||
-           f.warna_kulit.toLowerCase().includes(search.toLowerCase()) ||
-           f.tinggi_badan.toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    dispatch(getMe());
+  }, [dispatch]);
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      getFisik();
+    } else {
+      navigate("/");
+    }
+  }, [navigate]);
+
+  const getFisik = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const apiUrl = process.env.REACT_APP_URL_API;
+
+      const response = await axios.get(`${apiUrl}/fisik`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.data) {
+        setFisik(response.data);
+      } else {
+        setFisik([]);
+      }
+      console.log(response.data);
+    } catch (err) {
+      console.error("Error fetching fisik:", err);
+      setFisik([]);
+    }
+  };
+
+  const filtered = fisik.filter((f) =>
+    f.pegawai?.namaDenganGelar?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -162,7 +197,7 @@ const ListFisik = () => {
                 <thead>
                   <tr style={{ background: isDark ? "rgba(56,139,255,.1)" : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`, borderBottom: `1px solid ${isDark ? "rgba(56,139,255,.2)" : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.15)`}` }}>
                     {[
-                      "No", "Nama", "Tinggi Badan", "Jenis Rambut", "Warna Rambut", "Bentuk Wajah", "Warna Kulit", "Ciri Khusus", "Aksi",
+                      "No", "Nama", "Tinggi Badan", "Berat Badan", "Jenis Rambut", "Warna Rambut", "Bentuk Wajah", "Warna Kulit", "Ciri Khusus", "Aksi",
                     ].map((h) => (
                       <th
                         key={h}
@@ -188,7 +223,7 @@ const ListFisik = () => {
                   ) : (
                     paginated.map((f, i) => (
                       <tr
-                        key={f.uuid}
+                        key={f.id}
                         style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"}` }}
                         className={`transition-colors duration-150 ${isDark ? 'hover:bg-blue-500/5' : 'hover:bg-gray-100/30'}`}
                       >
@@ -202,33 +237,37 @@ const ListFisik = () => {
                           <span className={`text-sm font-semibold ${
                             isDark ? 'text-white' : 'text-gray-900'
                           }`}>
-                            {f.nama}
+                            {f.pegawai?.namaDenganGelar}
                           </span>
                         </td>
                         {/* Tinggi Badan */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {f.tinggi_badan}
+                          {f.tinggiBadan}
+                        </td>
+                        {/* Berat Badan */}
+                        <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
+                          {f.beratBadan}
                         </td>
                         {/* Jenis Rambut */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {f.jenis_rambut}
+                          {f.jenisRambut}
                         </td>
                         {/* Warna Rambut */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {f.warna_rambut}
+                          {f.warnaRambut}
                         </td>
                         {/* Bentuk Wajah */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {f.bentuk_wajah}
+                          {f.bentukWajah}
                         </td>
                         {/* Warna Kulit */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          {f.warna_kulit}
+                          {f.warnaKulit}
                         </td>
                         {/* Ciri Khusus */}
                         <td className="px-4 py-3 text-sm" style={{ color: isDark ? "rgba(220,235,255,.8)" : "rgba(0,0,0,.7)" }}>
-                          <div className="max-w-xs" title={f.ciri_khusus}>
-                            {f.ciri_khusus}
+                          <div className="max-w-xs" title={f.ciriKhusus}>
+                            {f.ciriKhusus}
                           </div>
                         </td>
                         {/* Aksi */}

@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useSelector } from "react-redux";
 import { Link, NavLink } from 'react-router-dom'
-import { MdOutlineCancel } from 'react-icons/md'
-import { FaUser, FaProjectDiagram, FaTools, FaCertificate, FaBriefcase, FaGraduationCap, FaUsers, FaLock } from 'react-icons/fa';
+import { MdOutlineCancel, MdKeyboardArrowDown } from 'react-icons/md'
+import { FaUser, FaProjectDiagram, FaTools, FaCertificate, FaBriefcase, FaGraduationCap, FaUsers, FaHeart, FaChild, FaLock } from 'react-icons/fa';
 import { BiSolidDashboard } from 'react-icons/bi';
 
 import { useStateContext } from '../contexts/ContextProvider'
@@ -11,6 +11,7 @@ const Sidebar = () => {
   const { activeMenu, setActiveMenu, screenSize, currentColor, currentMode } = useStateContext()
   const { user } = useSelector((state) => state.auth);
   const userRole = user?.role || 'siswa';
+  const [openSubMenu, setOpenSubMenu] = useState('');
 
   // Portfolio themed links configuration
   const allLinks = [
@@ -84,10 +85,24 @@ const Sidebar = () => {
           allowedRoles: ['admin']
         },
         {
-          name: 'pasangan',
+          name: 'keluarga',
           displayName: 'Keluarga',
           icon: <FaUsers />,
-          allowedRoles: ['admin']
+          allowedRoles: ['admin'],
+          subLinks: [
+            {
+              name: 'pasangan',
+              displayName: 'Pasangan',
+              icon: <FaHeart />,
+              allowedRoles: ['admin']
+            },
+            {
+              name: 'anak',
+              displayName: 'Anak',
+              icon: <FaChild />,
+              allowedRoles: ['admin']
+            },
+          ]
         },
       ],
     },
@@ -107,16 +122,27 @@ const Sidebar = () => {
   // Filter links based on user role
   const filterLinksByRole = (links, role) => {
     const filteredCategories = links.map(category => {
-      const filteredLinks = category.links.filter(link => 
-        link.allowedRoles.includes(role)
-      );
-      
+      const filteredLinks = category.links
+        .map(link => {
+          if (link.subLinks) {
+            const filteredSubLinks = link.subLinks.filter(subLink =>
+              subLink.allowedRoles.includes(role)
+            );
+            return filteredSubLinks.length
+              ? { ...link, subLinks: filteredSubLinks }
+              : null;
+          }
+
+          return link.allowedRoles.includes(role) ? link : null;
+        })
+        .filter(Boolean);
+
       return {
         ...category,
         links: filteredLinks
       };
     });
-    
+
     return filteredCategories.filter(category => category.links.length > 0);
   };
 
@@ -200,51 +226,110 @@ const Sidebar = () => {
                 {/* Navigation Items */}
                 <div className="space-y-1">
                   {item.links.map((link) => (
-                    <NavLink 
-                      to={`/${link.name}`} 
-                      key={link.name} 
-                      onClick={handleCloseSideBar} 
-                      className={({ isActive }) => {
-                        const baseStyle = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative overflow-hidden group`;
-                        
-                        if (isActive) {
-                          return `${baseStyle} text-white`;
-                        }
-                        
-                        return `${baseStyle} ${
-                          isDark 
-                            ? 'text-gray-400 hover:text-gray-200' 
-                            : 'text-gray-600 hover:text-gray-900'
-                        }`;
-                      }}
-                      style={({ isActive }) => 
-                        isActive 
-                          ? { 
-                              backgroundColor: currentColor,
-                              boxShadow: `0 4px 12px ${currentColor}40`
-                            }
-                          : {}
-                      }
-                    >
-                      {/* Background glow on hover */}
-                      <div
-                        className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-10 ${
-                          isDark ? 'bg-gray-800' : 'bg-gray-100'
-                        }`}
-                      />
-                      
-                      <span className="text-base flex-shrink-0">{link.icon}</span>
-                      <span className='flex-1'>{link.displayName}</span>
-                      
-                      {/* Active indicator */}
-                      <div 
-                        className="absolute right-0 top-0 bottom-0 w-1 rounded-full transition-all duration-200"
-                        style={{
-                          background: 'currentColor',
-                          opacity: 0
+                    link.subLinks ? (
+                      <div key={link.name} className="space-y-1">
+                        <button
+                          type="button"
+                          onClick={() => setOpenSubMenu(prev => prev === link.name ? '' : link.name)}
+                          className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative overflow-hidden group ${
+                            isDark
+                              ? 'text-gray-400 hover:text-gray-200'
+                              : 'text-gray-600 hover:text-gray-900'
+                          }`}
+                        >
+                          <span className="text-base flex-shrink-0">{link.icon}</span>
+                          <span className='flex-1 text-left'>{link.displayName}</span>
+                          <MdKeyboardArrowDown
+                            className={`transition-transform duration-200 ${openSubMenu === link.name ? 'rotate-180' : ''}`}
+                          />
+                        </button>
+
+                        {openSubMenu === link.name && (
+                          <div className="space-y-1 pl-6">
+                            {link.subLinks.map((subLink) => (
+                              <NavLink
+                                to={`/${subLink.name}`}
+                                key={subLink.name}
+                                onClick={handleCloseSideBar}
+                                className={({ isActive }) => {
+                                  const baseStyle = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative overflow-hidden group`;
+                                  if (isActive) {
+                                    return `${baseStyle} text-white`;
+                                  }
+                                  return `${baseStyle} ${
+                                    isDark
+                                      ? 'text-gray-400 hover:text-gray-200'
+                                      : 'text-gray-600 hover:text-gray-900'
+                                  }`;
+                                }}
+                                style={({ isActive }) =>
+                                  isActive
+                                    ? {
+                                        backgroundColor: currentColor,
+                                        boxShadow: `0 4px 12px ${currentColor}40`
+                                      }
+                                    : {}
+                                }
+                              >
+                                <div
+                                  className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-10 ${
+                                    isDark ? 'bg-gray-800' : 'bg-gray-100'
+                                  }`}
+                                />
+                                <span className="text-base flex-shrink-0">{subLink.icon}</span>
+                                <span className='flex-1'>{subLink.displayName}</span>
+                              </NavLink>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <NavLink 
+                        to={`/${link.name}`} 
+                        key={link.name} 
+                        onClick={handleCloseSideBar} 
+                        className={({ isActive }) => {
+                          const baseStyle = `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative overflow-hidden group`;
+                          
+                          if (isActive) {
+                            return `${baseStyle} text-white`;
+                          }
+                          
+                          return `${baseStyle} ${
+                            isDark 
+                              ? 'text-gray-400 hover:text-gray-200' 
+                              : 'text-gray-600 hover:text-gray-900'
+                          }`;
                         }}
-                      />
-                    </NavLink>
+                        style={({ isActive }) => 
+                          isActive 
+                            ? { 
+                                backgroundColor: currentColor,
+                                boxShadow: `0 4px 12px ${currentColor}40`
+                              }
+                            : {}
+                        }
+                      >
+                        {/* Background glow on hover */}
+                        <div
+                          className={`absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 -z-10 ${
+                            isDark ? 'bg-gray-800' : 'bg-gray-100'
+                          }`}
+                        />
+                        
+                        <span className="text-base flex-shrink-0">{link.icon}</span>
+                        <span className='flex-1'>{link.displayName}</span>
+                        
+                        {/* Active indicator */}
+                        <div 
+                          className="absolute right-0 top-0 bottom-0 w-1 rounded-full transition-all duration-200"
+                          style={{
+                            background: 'currentColor',
+                            opacity: 0
+                          }}
+                        />
+                      </NavLink>
+                    )
                   ))}
                 </div>
               </div>

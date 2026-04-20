@@ -1,28 +1,64 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from 'axios';
+import { useDispatch } from "react-redux";
+import { getMe } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
 import {
   HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
-import { dummyUkuran } from "../data/dummy";
 
 const ITEMS_PER_PAGE = 10;
 
 const ListUkuran = () => {
+  const [ukuran, setUkuran] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState(null);
-  const [ukuran] = useState(dummyUkuran);
   const [isLoading] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { currentColor, currentMode } = useStateContext();
   const isDark = currentMode === 'Dark';
 
+  useEffect(() => {
+      dispatch(getMe());
+    }, [dispatch]);
+  
+    useEffect(() => {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        getUkuran();
+      } else {
+        navigate("/");
+      }
+    }, [navigate]);
+  
+    const getUkuran = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = process.env.REACT_APP_URL_API;
+  
+        const response = await axios.get(`${apiUrl}/ukuran`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+  
+        if (response.data) {
+          setUkuran(response.data);
+        } else {
+          setUkuran([]);
+        }
+        console.log(response.data);
+        
+      } catch (err) {
+        console.error('Error fetching ukuran:', err);
+        setUkuran([]);
+      }
+    };
+
   const filtered = ukuran.filter(
-    (u) => u.nama.toLowerCase().includes(search.toLowerCase()) ||
-           u.ukuran_pad.toLowerCase().includes(search.toLowerCase()) ||
-           u.ukuran_sepatu.toLowerCase().includes(search.toLowerCase())
+    (u) => u.pegawai?.namaDenganGelar?.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
@@ -115,7 +151,7 @@ const ListUkuran = () => {
             </div>
             {/* Add Button */}
             <button
-              onClick={() => navigate("/ukuran/add")}
+              onClick={() => navigate("/add-ukuran")}
               className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-88 hover:-translate-y-0.5"
               style={{
                 background: currentColor,
@@ -188,7 +224,7 @@ const ListUkuran = () => {
                   ) : (
                     paginated.map((u, i) => (
                       <tr
-                        key={u.uuid}
+                        key={u.id}
                         style={{ borderBottom: `1px solid ${isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.05)"}` }}
                         className={`transition-colors duration-150 ${isDark ? 'hover:bg-blue-500/5' : 'hover:bg-gray-100/30'}`}
                       >
@@ -202,7 +238,7 @@ const ListUkuran = () => {
                           <span className={`text-sm font-semibold ${
                             isDark ? 'text-white' : 'text-gray-900'
                           }`}>
-                            {u.nama}
+                            {u.pegawai?.namaDenganGelar}
                           </span>
                         </td>
                         {/* Ukuran PAD */}
@@ -215,7 +251,7 @@ const ListUkuran = () => {
                               color: "#86efac",
                             }}
                           >
-                            {u.ukuran_pad}
+                            {u.ukuranPadDivamot}
                           </span>
                         </td>
                         {/* Ukuran Sepatu */}
@@ -228,7 +264,7 @@ const ListUkuran = () => {
                               color: "#60a5fa",
                             }}
                           >
-                            {u.ukuran_sepatu}
+                            {u.ukuranSepatu}
                           </span>
                         </td>
                         {/* Ukuran Topi */}
@@ -241,7 +277,7 @@ const ListUkuran = () => {
                               color: "#d8b4fe",
                             }}
                           >
-                            {u.ukuran_topi}
+                            {u.ukuranTopi}
                           </span>
                         </td>
                         {/* Aksi */}
