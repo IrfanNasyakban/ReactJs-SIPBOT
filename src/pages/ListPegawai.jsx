@@ -298,7 +298,7 @@ const ListPegawai = () => {
                         </td>
                         {/* Gender */}
                         <td className="px-4 py-3 text-sm font-semibold">
-                          <span style={{ color: p.gender === "Laki-Laki" ? currentColor : "#f472b6" }}>
+                          <span style={{ color: p.gender === "Laki-Laki" || p.gender === "Perempuan" ? currentColor : "#f472b6" }}>
                             {p.gender}
                           </span>
                         </td>

@@ -31,6 +31,12 @@ const Sidebar = () => {
       title: 'Data Pegawai',
       links: [
         {
+          name: 'filter',
+          displayName: 'Filter',
+          icon: <FaUser />,
+          allowedRoles: ['admin']
+        },
+        {
           name: 'pegawai',
           displayName: 'Pegawai',
           icon: <FaUser />,
@@ -80,7 +86,7 @@ const Sidebar = () => {
         },
         {
           name: 'ukuran',
-          displayName: 'Dinas',
+          displayName: 'Ukuran Dinas',
           icon: <FaUsers />,
           allowedRoles: ['admin']
         },
@@ -193,7 +199,7 @@ const Sidebar = () => {
           >
             <div>
               <span style={{ color: currentColor }}>SIPBOT</span>
-              <span> IMIGRASI</span>
+              <span> <span style={{ color: "#FDB927" }}>IMIGRASI</span></span>
             </div>
           </Link>
           

@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../features/authSlice";
 import { useStateContext } from "../contexts/ContextProvider";
+
+import { BsPersonFill, BsFillTelephoneFill } from "react-icons/bs";
 import { HiArrowLeft } from "react-icons/hi";
 
 const AddIdentitas = () => {
@@ -229,7 +231,7 @@ const AddIdentitas = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">👤</span>
+                    <BsPersonFill className="w-8 h-8 dark:text-white" />
                     Pilih Pegawai
                   </h2>
                   <p
@@ -319,7 +321,7 @@ const AddIdentitas = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">👤</span>
+                    <BsPersonFill className="w-8 h-8 dark:text-white" />
                     Data Identitas Kependudukan
                   </h2>
                 </div>
@@ -431,7 +433,7 @@ const AddIdentitas = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">📞</span>
+                    <BsFillTelephoneFill className="w-7 h-7 dark:text-white" />
                     Data Kepesertaan Asuransi & Pensiun
                   </h2>
                 </div>

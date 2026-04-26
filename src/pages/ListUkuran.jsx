@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { getMe } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
 import {
-  HiEye, HiPencil, HiTrash, HiPlus, HiSearch,
+  HiPencil, HiTrash, HiPlus, HiSearch,
 } from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
 
@@ -67,8 +67,27 @@ const ListUkuran = () => {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handleDelete = (id) => {
-    setConfirmDelete(null);
+  const handleDelete = async (id) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const apiUrl = process.env.REACT_APP_URL_API;
+
+      await axios.delete(`${apiUrl}/ukuran/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Tutup modal setelah berhasil hapus
+      setConfirmDelete(null);
+
+      // Refresh data
+      getUkuran();
+    } catch (err) {
+      console.error("Error deleting ukuran:", err);
+      // Tetap tutup modal meskipun error
+      setConfirmDelete(null);
+    }
   };
 
   return (
@@ -283,24 +302,9 @@ const ListUkuran = () => {
                         {/* Aksi */}
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-center gap-1.5">
-                            {/* View */}
-                            <button
-                              onClick={() => navigate(`/ukuran/${u.uuid}`)}
-                              title="Lihat Detail"
-                              className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
-                              style={{
-                                background: "transparent",
-                                border: `1px solid ${isDark ? "rgba(55,138,221,.35)" : "rgba(0,0,0,.1)"}`,
-                                color: currentColor,
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.background = isDark ? "rgba(55,138,221,.2)" : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.1)`}
-                              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-                            >
-                              <HiEye className="w-3.5 h-3.5" />
-                            </button>
                             {/* Edit */}
                             <button
-                              onClick={() => navigate(`/ukuran/edit/${u.uuid}`)}
+                              onClick={() => navigate(`/ukuran/edit/${u.id}`)}
                               title="Edit"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{
@@ -315,7 +319,7 @@ const ListUkuran = () => {
                             </button>
                             {/* Delete */}
                             <button
-                              onClick={() => setConfirmDelete(u.uuid)}
+                              onClick={() => setConfirmDelete(u.id)}
                               title="Hapus"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{

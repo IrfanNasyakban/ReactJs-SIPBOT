@@ -2,7 +2,45 @@ import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import { Navbar, Footer, Sidebar, ThemeSettings } from "./components";
-import { Page404, LoginPage, Dashboard, ListPegawai, ListKepegawaian, ListPangkat, ListAlamat, ListIdentitas, ListRekening, ListPendidikan, ListFisik, ListUkuran, ListPasangan, ListAnak, AddPegawai, AddKepegawaian, AddPangkat, AddAlamat, AddIdentitas, AddRekening, AddPendidikan, AddFisik, AddUkuran, AddPasangan } from "./pages";
+import { 
+  Page404, 
+  LoginPage, 
+  Dashboard, 
+  ListPegawai, 
+  ListKepegawaian, 
+  ListPangkat, 
+  ListAlamat, 
+  ListIdentitas, 
+  ListRekening, 
+  ListPendidikan, 
+  ListFisik, 
+  ListUkuran, 
+  ListPasangan, 
+  ListAnak, 
+  AddPegawai, 
+  AddKepegawaian, 
+  AddPangkat, 
+  AddAlamat, 
+  AddIdentitas, 
+  AddRekening, 
+  AddPendidikan, 
+  AddFisik, 
+  AddUkuran, 
+  AddPasangan, 
+  AddAnak, 
+  EditPegawai, 
+  EditKepegawaian, 
+  EditPangkat, 
+  EditAlamat, 
+  EditIdentitas,
+  EditRekening,
+  EditPendidikan,
+  EditFisik,
+  EditUkuran,
+  EditPasangan,
+  EditAnak
+
+} from "./pages";
 
 import { useStateContext } from "./contexts/ContextProvider";
 
@@ -88,8 +126,19 @@ const AppContent = () => {
               <Route path="/add-fisik" element={<AddFisik />} />
               <Route path="/add-ukuran" element={<AddUkuran />} />
               <Route path="/add-pasangan" element={<AddPasangan />} />
-              Portfolio Routes
-
+              <Route path="/add-anak" element={<AddAnak />} />
+              <Route path="/pegawai/edit/:id" element={<EditPegawai />} />
+              <Route path="/kepegawaian/edit/:id" element={<EditKepegawaian />} />
+              <Route path="/pangkat/edit/:id" element={<EditPangkat />} />
+              <Route path="/alamat/edit/:id" element={<EditAlamat />} />
+              <Route path="/identitas/edit/:id" element={<EditIdentitas />} />
+              <Route path="/rekening/edit/:id" element={<EditRekening />} />
+              <Route path="/pendidikan/edit/:id" element={<EditPendidikan />} />
+              <Route path="/fisik/edit/:id" element={<EditFisik />} />
+              <Route path="/ukuran/edit/:id" element={<EditUkuran />} />
+              <Route path="/pasangan/edit/:id" element={<EditPasangan />} />
+              <Route path="/anak/edit/:id" element={<EditAnak />} />
+              
               <Route path="/page-not-found" element={<Page404 />} />
               <Route path="*" element={<Page404 />} />
             </Routes>

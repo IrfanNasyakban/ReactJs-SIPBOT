@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../features/authSlice";
 import { useStateContext } from "../contexts/ContextProvider";
+
+import { BsPersonFill } from "react-icons/bs";
 import { HiArrowLeft } from "react-icons/hi";
 
 const AddPasangan = () => {
@@ -154,7 +156,7 @@ const AddPasangan = () => {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <button
-                onClick={() => navigate("/pegawai")}
+                onClick={() => navigate("/pasangan")}
                 className="p-2 rounded-lg transition-all duration-200 hover:scale-110"
                 style={{
                   background: isDark
@@ -223,7 +225,7 @@ const AddPasangan = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">👤</span>
+                    <BsPersonFill className="w-8 h-8 dark:text-white"/>
                     Pilih Pegawai
                   </h2>
                   <p
@@ -388,7 +390,7 @@ const AddPasangan = () => {
             >
               <button
                 type="button"
-                onClick={() => navigate("/pegawai")}
+                onClick={() => navigate("/pasangan")}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105"
                 style={{
                   background: isDark

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { getMe } from "../features/authSlice";
-import { useStateContext } from "../contexts/ContextProvider";
+import { useNavigate, useParams } from "react-router-dom";
+import { getMe } from "../../features/authSlice";
+import { useStateContext } from "../../contexts/ContextProvider";
 
 import { BsPersonFill } from "react-icons/bs";
 import { HiArrowLeft } from "react-icons/hi";
 
-const AddFisik = () => {
+const EditFisik = () => {
   const [tinggiBadan, setTinggiBadan] = useState("");
   const [beratBadan, setBeratBadan] = useState("");
   const [jenisRambut, setJenisRambut] = useState("");
@@ -17,8 +17,9 @@ const AddFisik = () => {
   const [warnaKulit, setWarnaKulit] = useState("");
   const [ciriKhusus, setCiriKhusus] = useState("");
 
-  const [idPegawai, setIdPegawai] = useState("");
-  const [pegawai, setPegawai] = useState([]);
+  const [namaDenganGelar, setNamaDenganGelar] = useState("");
+  const [nip, setNip] = useState("");
+  const { id } = useParams();
 
   const [loading, setLoading] = useState(false);
   const { currentColor, currentMode } = useStateContext();
@@ -34,84 +35,57 @@ const AddFisik = () => {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
-      getPegawai();
+      getFisikById();
     } else {
       navigate("/");
     }
   }, [navigate]);
 
-  const getPegawai = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("accessToken");
-      const apiUrl = process.env.REACT_APP_URL_API;
-
-      const [pegawaiResponse, fisikResponse] = await Promise.all([
-        axios.get(`${apiUrl}/pegawai`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${apiUrl}/fisik`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
-
-      const existingIds = new Set(
-        (fisikResponse.data || []).map((item) => item.idPegawai),
-      );
-
-      const availablePegawai = (pegawaiResponse.data || []).filter(
-        (item) => !existingIds.has(item.id),
-      );
-
-      setPegawai(availablePegawai);
-    } catch (err) {
-      console.error("Error fetching pegawai:", err);
-      setPegawai([]);
-    } finally {
-      setLoading(false);
-    }
+  const getFisikById = async () => {
+    const token = localStorage.getItem("accessToken");
+    const response = await axios.get(`http://localhost:5000/fisik/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setTinggiBadan(response.data.tinggiBadan);
+    setBeratBadan(response.data.beratBadan);
+    setJenisRambut(response.data.jenisRambut);
+    setWarnaRambut(response.data.warnaRambut);
+    setBentukWajah(response.data.bentukWajah);
+    setWarnaKulit(response.data.warnaKulit);
+    setCiriKhusus(response.data.ciriKhusus);
+    setNamaDenganGelar(response.data.pegawai.namaDenganGelar);
+    setNip(response.data.pegawai.nip);
   };
 
-  const saveFisik = async (e) => {
+  const updateFisik = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    const formData = new FormData();
+    formData.append("tinggiBadan", tinggiBadan);
+    formData.append("beratBadan", beratBadan);
+    formData.append("jenisRambut", jenisRambut);
+    formData.append("warnaRambut", warnaRambut);
+    formData.append("bentukWajah", bentukWajah);
+    formData.append("warnaKulit", warnaKulit);
+    formData.append("ciriKhusus", ciriKhusus);
 
-    const jsonData = {
-      idPegawai,
-      tinggiBadan,
-      beratBadan,
-      jenisRambut,
-      warnaRambut,
-      bentukWajah,
-      warnaKulit,
-      ciriKhusus,
-    };
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      jsonData[key] = value;
+    });
 
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await axios.post(
-        "http://localhost:5000/fisik",
-        jsonData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+      await axios.patch(`http://localhost:5000/fisik/${id}`, jsonData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      );
-      console.log("Response dari Server:", response);
-      setLoading(false);
+      });
       navigate("/fisik");
     } catch (error) {
-      setLoading(false);
-      console.error(
-        "Error:",
-        error.response ? error.response.data : error.message,
-      );
-      alert(
-        "Terjadi kesalahan: " +
-          (error.response?.data?.message || error.message),
-      );
+      console.log(error);
     }
   };
 
@@ -126,9 +100,9 @@ const AddFisik = () => {
         className="fixed inset-0 pointer-events-none z-0"
         style={{
           backgroundImage: `
-                    linear-gradient(${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px),
-                    linear-gradient(90deg, ${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px)
-                  `,
+                        linear-gradient(${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px),
+                        linear-gradient(90deg, ${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px)
+                      `,
           backgroundSize: "48px 48px",
         }}
       />
@@ -186,7 +160,7 @@ const AddFisik = () => {
                   isDark ? "text-white" : "text-gray-900"
                 }`}
               >
-                Tambah Data <span style={{ color: currentColor }}>Fisik</span>
+                Ubah Data <span style={{ color: currentColor }}>Fisik</span>
               </h1>
             </div>
             <p
@@ -195,14 +169,14 @@ const AddFisik = () => {
                 color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)",
               }}
             >
-              Formulir Penambahan Data Ciri-Ciri Fisik Pegawai - Kantor Imigrasi
+              Formulir Pengubahan Data Ciri-Ciri Fisik Pegawai - Kantor Imigrasi
               Kelas II TPI Lhokseumawe
             </p>
           </div>
         </div>
 
         {/* Form Card */}
-        <form onSubmit={saveFisik}>
+        <form onSubmit={updateFisik}>
           <div
             className="rounded-2xl overflow-hidden"
             style={{
@@ -222,7 +196,7 @@ const AddFisik = () => {
             />
 
             <div className="p-8">
-              {/* ── Section 0: Pilih Pegawai ── */}
+              {/* ── Section 0: Informasi Pegawai ── */}
               <div className="mb-8">
                 <div
                   className="pb-4 border-b"
@@ -237,7 +211,7 @@ const AddFisik = () => {
                     style={{ color: currentColor }}
                   >
                     <BsPersonFill className="w-8 h-8 dark:text-white" />
-                    Pilih Pegawai
+                    Informasi Pegawai
                   </h2>
                   <p
                     className="text-xs mt-1"
@@ -252,7 +226,7 @@ const AddFisik = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* Nama Pegawai */}
+                  {/* Nama Lengkap */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -262,52 +236,44 @@ const AddFisik = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Nama Pegawai <span style={{ color: "#ef4444" }}>*</span>
+                      Nama Lengkap
                     </label>
-                    <select
-                      name="namaPegawai"
-                      required
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                    <div
+                      className="w-full py-3 rounded-xl text-sm transition-all duration-200"
                       style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.12)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
+                        minHeight: 48,
                       }}
-                      value={idPegawai === "" ? "" : idPegawai.toString()}
-                      onChange={(e) => setIdPegawai(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.15)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.12)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                      disabled={pegawai.length === 0}
                     >
-                      <option value="" disabled style={{ color: "black" }}>
-                        {pegawai.length > 0
-                          ? "-- Pilih Nama Pegawai --"
-                          : "Tidak ada pegawai tanpa data kepegawaian"}
-                      </option>
-                      {pegawai.map((item) => (
-                        <option
-                          key={item.id}
-                          value={item.id}
-                          style={{ color: "black" }}
-                        >
-                          {item.namaDenganGelar || item.nama}
-                        </option>
-                      ))}
-                    </select>
+                      <p className="text-base font-medium break-words">
+                        {namaDenganGelar || "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* NIP */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      NIP
+                    </label>
+                    <div
+                      className="w-full py-3 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        color: isDark ? "white" : "black",
+                        minHeight: 48,
+                      }}
+                    >
+                      <p className="text-base font-medium break-words">
+                        {nip || "-"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -800,7 +766,7 @@ const AddFisik = () => {
                     Menyimpan...
                   </>
                 ) : (
-                  <>Simpan</>
+                  <>Simpan Perubahan</>
                 )}
               </button>
             </div>
@@ -811,4 +777,4 @@ const AddFisik = () => {
   );
 };
 
-export default AddFisik;
+export default EditFisik;

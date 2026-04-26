@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { getMe } from "../features/authSlice";
-import { useStateContext } from "../contexts/ContextProvider";
+import { useNavigate, useParams } from "react-router-dom";
+import { getMe } from "../../features/authSlice";
+import { useStateContext } from "../../contexts/ContextProvider";
 
 import { BsPersonFill } from "react-icons/bs";
 import { HiArrowLeft } from "react-icons/hi";
 
-const AddPendidikan = () => {
-  const [pendidikanTerakhir, setPendidikanTerakhir] = useState("");
-
-  const [idPegawai, setIdPegawai] = useState("");
-  const [pegawai, setPegawai] = useState([]);
+const EditAlamat = () => {
+  const [alamatKTP, setAlamatKTP] = useState("");
+  const [alamatDomisili, setAlamatDomisili] = useState("");
+  const [alamatSamaDenganKTP, setAlamatSamaDenganKTP] = useState(false);
+  const [namaDenganGelar, setNamaDenganGelar] = useState("");
+  const [nip, setNip] = useState("");
+  const { id } = useParams();
 
   const [loading, setLoading] = useState(false);
   const { currentColor, currentMode } = useStateContext();
@@ -28,78 +30,49 @@ const AddPendidikan = () => {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
-      getPegawai();
+      getAlamatById();
     } else {
       navigate("/");
     }
   }, [navigate]);
 
-  const getPegawai = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("accessToken");
-      const apiUrl = process.env.REACT_APP_URL_API;
-
-      const [pegawaiResponse, pendidikanResponse] = await Promise.all([
-        axios.get(`${apiUrl}/pegawai`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${apiUrl}/pendidikan`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
-
-      const existingIds = new Set(
-        (pendidikanResponse.data || []).map((item) => item.idPegawai),
-      );
-
-      const availablePegawai = (pegawaiResponse.data || []).filter(
-        (item) => !existingIds.has(item.id),
-      );
-
-      setPegawai(availablePegawai);
-    } catch (err) {
-      console.error("Error fetching pegawai:", err);
-      setPegawai([]);
-    } finally {
-      setLoading(false);
-    }
+  const getAlamatById = async () => {
+    const token = localStorage.getItem("accessToken");
+    const response = await axios.get(`http://localhost:5000/alamat/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setAlamatKTP(response.data.alamatKTP);
+    setAlamatDomisili(response.data.alamatDomisili);
+    setAlamatSamaDenganKTP(response.data.alamatSamaDenganKTP);
+    setNamaDenganGelar(response.data.pegawai.namaDenganGelar);
+    setNip(response.data.pegawai.nip);
   };
 
-  const savePendidikan = async (e) => {
+  const updateAlamat = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    const formData = new FormData();
+    formData.append("alamatKTP", alamatKTP);
+    formData.append("alamatDomisili", alamatDomisili);
+    formData.append("alamatSamaDenganKTP", alamatSamaDenganKTP);
 
-    const jsonData = {
-      idPegawai,
-      pendidikanTerakhir,
-    };
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      jsonData[key] = value;
+    });
 
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await axios.post(
-        "http://localhost:5000/pendidikan",
-        jsonData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+      await axios.patch(`http://localhost:5000/alamat/${id}`, jsonData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      );
-      console.log("Response dari Server:", response);
-      setLoading(false);
-      navigate("/pendidikan");
+      });
+      navigate("/alamat");
     } catch (error) {
-      setLoading(false);
-      console.error(
-        "Error:",
-        error.response ? error.response.data : error.message,
-      );
-      alert(
-        "Terjadi kesalahan: " +
-          (error.response?.data?.message || error.message),
-      );
+      console.log(error);
     }
   };
 
@@ -156,7 +129,7 @@ const AddPendidikan = () => {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <button
-                onClick={() => navigate("/pendidikan")}
+                onClick={() => navigate("/alamat")}
                 className="p-2 rounded-lg transition-all duration-200 hover:scale-110"
                 style={{
                   background: isDark
@@ -174,8 +147,7 @@ const AddPendidikan = () => {
                   isDark ? "text-white" : "text-gray-900"
                 }`}
               >
-                Tambah Data{" "}
-                <span style={{ color: currentColor }}>Pendidikan</span>
+                Edit Data <span style={{ color: currentColor }}>Alamat</span>
               </h1>
             </div>
             <p
@@ -184,14 +156,14 @@ const AddPendidikan = () => {
                 color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)",
               }}
             >
-              Formulir Penambahan Data Pendidikan Baru - Kantor Imigrasi Kelas
-              II TPI Lhokseumawe
+              Formulir Pengeditan Data Alamat - Kantor Imigrasi Kelas II TPI
+              Lhokseumawe
             </p>
           </div>
         </div>
 
         {/* Form Card */}
-        <form onSubmit={savePendidikan}>
+        <form onSubmit={updateAlamat}>
           <div
             className="rounded-2xl overflow-hidden"
             style={{
@@ -211,7 +183,7 @@ const AddPendidikan = () => {
             />
 
             <div className="p-8">
-              {/* ── Section 0: Pilih Pegawai ── */}
+              {/* ── Section 0: Informasi Pegawai ── */}
               <div className="mb-8">
                 <div
                   className="pb-4 border-b"
@@ -225,8 +197,8 @@ const AddPendidikan = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <BsPersonFill className="w-8 h-8 dark:text-white"/>
-                    Pilih Pegawai
+                    <BsPersonFill className="w-8 h-8 dark:text-white" />
+                    Informasi Pegawai
                   </h2>
                   <p
                     className="text-xs mt-1"
@@ -241,7 +213,7 @@ const AddPendidikan = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* Nama Pegawai */}
+                  {/* Nama Lengkap */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -251,57 +223,49 @@ const AddPendidikan = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Nama Pegawai <span style={{ color: "#ef4444" }}>*</span>
+                      Nama Lengkap
                     </label>
-                    <select
-                      name="namaPegawai"
-                      required
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                    <div
+                      className="w-full py-3 rounded-xl text-sm transition-all duration-200"
                       style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.12)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
+                        minHeight: 48,
                       }}
-                      value={idPegawai === "" ? "" : idPegawai.toString()}
-                      onChange={(e) => setIdPegawai(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.15)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.12)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                      disabled={pegawai.length === 0}
                     >
-                      <option value="" disabled style={{ color: "black" }}>
-                        {pegawai.length > 0
-                          ? "-- Pilih Nama Pegawai --"
-                          : "Tidak ada pegawai tanpa data kepegawaian"}
-                      </option>
-                      {pegawai.map((item) => (
-                        <option
-                          key={item.id}
-                          value={item.id}
-                          style={{ color: "black" }}
-                        >
-                          {item.namaDenganGelar || item.nama}
-                        </option>
-                      ))}
-                    </select>
+                      <p className="text-base font-medium break-words">
+                        {namaDenganGelar || "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* NIP */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      NIP
+                    </label>
+                    <div
+                      className="w-full py-3 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        color: isDark ? "white" : "black",
+                        minHeight: 48,
+                      }}
+                    >
+                      <p className="text-base font-medium break-words">
+                        {nip || "-"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* ── Section 1: Data Pendidikan ── */}
+              {/* ── Section 1: Data Alamat Lengkap ── */}
               <div className="mb-8">
                 <div
                   className="pb-4 border-b"
@@ -315,13 +279,13 @@ const AddPendidikan = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">🎓</span>
-                    Data Pendidikan
+                    <BsPersonFill className="w-8 h-8 dark:text-white" />
+                    Data Alamat Lengkap
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 mt-6">
-                  {/* Pendidikan Terakhir */}
+                <div className="space-y-4 mt-6">
+                  {/* Alamat Sesuai KTP */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -331,72 +295,124 @@ const AddPendidikan = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Pendidikan Terakhir{" "}
+                      Alamat Sesuai KTP{" "}
                       <span style={{ color: "#ef4444" }}>*</span>
                     </label>
-                    <select
-                      name="pendidikanTerakhir"
+                    <textarea
+                      name="alamatKTP"
+                      type="textarea"
                       required
+                      placeholder="Masukkan alamat lengkap sesuai KTP
+    Contoh: Jl. Merdeka No. 123, RT 01/RW 02, Kelurahan Kampung Jawa, Kecamatan Banda Sakti, Kota Lhokseumawe, Aceh 24352"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
                         background: isDark
-                          ? "rgba(255,255,255,.12)"
+                          ? "rgba(255,255,255,.05)"
                           : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
                       }}
-                      value={
-                        pendidikanTerakhir === ""
-                          ? ""
-                          : pendidikanTerakhir.toString()
-                      }
-                      onChange={(e) => setPendidikanTerakhir(e.target.value)}
+                      value={alamatKTP}
+                      onChange={(e) => setAlamatKTP(e.target.value)}
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
                           : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
                       }}
                       onBlur={(e) => {
                         e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.15)"
+                          ? "rgba(255,255,255,.1)"
                           : "rgba(0,0,0,.1)";
                         e.target.style.background = isDark
-                          ? "rgba(255,255,255,.12)"
+                          ? "rgba(255,255,255,.05)"
                           : "rgba(0,0,0,.03)";
                       }}
+                    />
+                  </div>
+
+                  {/* Button Alamat Domisili sama dengan Alamat KTP */}
+                  <div className="flex justify-start">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAlamatSamaDenganKTP(!alamatSamaDenganKTP);
+                        if (!alamatSamaDenganKTP) {
+                          setAlamatDomisili(alamatKTP);
+                        } else {
+                          setAlamatDomisili("");
+                        }
+                      }}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105"
+                      style={{
+                        background: alamatSamaDenganKTP
+                          ? currentColor
+                          : isDark
+                            ? "rgba(255,255,255,.08)"
+                            : "rgba(0,0,0,.05)",
+                        border: `1.5px solid ${alamatSamaDenganKTP ? currentColor : isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
+                        color: alamatSamaDenganKTP
+                          ? "white"
+                          : isDark
+                            ? "rgba(255,255,255,.7)"
+                            : "rgba(0,0,0,.6)",
+                      }}
                     >
-                      <option value="" style={{ color: "black" }}>
-                        -- Pilih Pendidikan Terakhir --
-                      </option>
-                      <option value="SD" style={{ color: "black" }}>
-                        SD (Sekolah Dasar)
-                      </option>
-                      <option value="SMP" style={{ color: "black" }}>
-                        SMP (Sekolah Menengah Pertama)
-                      </option>
-                      <option value="SMA" style={{ color: "black" }}>
-                        SMA (Sekolah Menengah Atas)
-                      </option>
-                      <option value="D1" style={{ color: "black" }}>
-                        D1 (Diploma 1)
-                      </option>
-                      <option value="D2" style={{ color: "black" }}>
-                        D2 (Diploma 2)
-                      </option>
-                      <option value="D3" style={{ color: "black" }}>
-                        D3 (Diploma 3)
-                      </option>
-                      <option value="S1" style={{ color: "black" }}>
-                        S1 (Sarjana)
-                      </option>
-                      <option value="S2" style={{ color: "black" }}>
-                        S2 (Magister)
-                      </option>
-                      <option value="S3" style={{ color: "black" }}>
-                        S3 (Doktor)
-                      </option>
-                    </select>
+                      <input
+                        type="checkbox"
+                        checked={alamatSamaDenganKTP}
+                        onChange={() => {}}
+                        className="hidden"
+                      />
+                      <span>📋</span>
+                      <span>Alamat Domisili sama dengan Alamat KTP</span>
+                    </button>
+                  </div>
+
+                  {/* Alamat Domisili (Tempat Tinggal Saat ini) */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      Alamat Domisili (Tempat Tinggal Saat ini){" "}
+                      <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <textarea
+                      name="alamatDomisili"
+                      type="textarea"
+                      required
+                      placeholder="Masukkan alamat domisili saat ini
+    Contoh: Jl. Medan-Banda Aceh No. 45, RT 03/RW 04, Desa Muara Dua, Kecamatan Lhokseumawe Utara, Kota Lhokseumawe, Aceh 24356"
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.05)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={alamatDomisili}
+                      onChange={(e) => setAlamatDomisili(e.target.value)}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.1)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.05)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -424,7 +440,7 @@ const AddPendidikan = () => {
             >
               <button
                 type="button"
-                onClick={() => navigate("/pendidikan")}
+                onClick={() => navigate("/alamat")}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105"
                 style={{
                   background: isDark
@@ -457,7 +473,7 @@ const AddPendidikan = () => {
                     Menyimpan...
                   </>
                 ) : (
-                  <>Simpan</>
+                  <>Simpan Perubahan</>
                 )}
               </button>
             </div>
@@ -468,4 +484,4 @@ const AddPendidikan = () => {
   );
 };
 
-export default AddPendidikan;
+export default EditAlamat;

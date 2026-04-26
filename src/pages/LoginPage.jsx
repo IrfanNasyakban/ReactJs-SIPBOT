@@ -178,34 +178,25 @@ const LoginPage = () => {
 
           {/* Brand */}
           <div className="flex items-center gap-3 mb-6">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{
-                background: "rgba(56,139,255,.15)",
-                border: "1px solid rgba(56,139,255,.3)",
-              }}
-            >
-              <img
-                src={mascotImg}
-                alt="SIPBOT"
-                className="w-6 h-6 object-contain"
-              />
-            </div>
+            <img
+              src={mascotImg}
+              alt="SIPBOT"
+              className="w-12 h-12 flex-shrink-0"
+            />
             <div>
-              <h2 className="text-xl font-bold tracking-[3px] text-white">
-                SIP<span className="text-blue-400">BOT</span>
+              <h2 className="text-xl font-bold tracking-[3px]">
+                <span style={{ color: "#FDB927" }}>SIP</span><span className="text-blue-400">BOT</span>
               </h2>
-              <p className="text-[10px] tracking-wide" style={{ color: "rgba(255,255,255,.35)" }}>
+              <p className="text-[10px] tracking-wide" style={{ color: "rgba(200,225,255,.75)" }}>
                 Sistem Informasi Pegawai berbasis ChatBot
               </p>
             </div>
           </div>
-
           {/* Welcome */}
           <div className="mb-7">
             <h1 className="text-lg font-semibold text-white">
               Selamat Datang di{" "}
-              <span className="text-blue-400">SIPBOT</span>
+              <span className="text-blue-400"><span style={{ color: "#FDB927" }}>SIP</span><span className="text-blue-400">BOT</span></span>
             </h1>
             <p className="text-sm mt-1" style={{ color: "rgba(255,255,255,.4)" }}>
               Masukkan kredensial Anda untuk melanjutkan

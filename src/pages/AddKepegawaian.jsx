@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getMe } from "../features/authSlice";
 import { useStateContext } from "../contexts/ContextProvider";
 import { HiArrowLeft } from "react-icons/hi";
+import { BsPersonFill, BsFillTelephoneFill } from "react-icons/bs";
 
 const AddKepegawaian = () => {
   const [statusKepegawaian, setStatusKepegawaian] = useState("");
@@ -234,7 +235,7 @@ const AddKepegawaian = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">👤</span>
+                    <BsPersonFill className="w-8 h-8 dark:text-white"/>
                     Pilih Pegawai
                   </h2>
                   <p
@@ -320,7 +321,7 @@ const AddKepegawaian = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">👤</span>
+                    <BsPersonFill className="w-8 h-8 dark:text-white"/>
                     Status Kepegawaian
                   </h2>
                   <p
@@ -467,7 +468,7 @@ const AddKepegawaian = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">📞</span>
+                    <BsFillTelephoneFill className="w-7 h-7 dark:text-white" />
                     Data Jabatan
                   </h2>
                 </div>

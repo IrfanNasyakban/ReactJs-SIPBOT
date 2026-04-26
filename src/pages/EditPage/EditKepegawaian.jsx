@@ -1,24 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { getMe } from "../features/authSlice";
-import { useStateContext } from "../contexts/ContextProvider";
+import { useNavigate, useParams } from "react-router-dom";
+import { getMe } from "../../features/authSlice";
+import { useStateContext } from "../../contexts/ContextProvider";
 
-import { BsPersonFill } from "react-icons/bs";
+import { BsPersonFill, BsFillTelephoneFill } from "react-icons/bs";
 import { HiArrowLeft } from "react-icons/hi";
 
-const AddFisik = () => {
-  const [tinggiBadan, setTinggiBadan] = useState("");
-  const [beratBadan, setBeratBadan] = useState("");
-  const [jenisRambut, setJenisRambut] = useState("");
-  const [warnaRambut, setWarnaRambut] = useState("");
-  const [bentukWajah, setBentukWajah] = useState("");
-  const [warnaKulit, setWarnaKulit] = useState("");
-  const [ciriKhusus, setCiriKhusus] = useState("");
-
-  const [idPegawai, setIdPegawai] = useState("");
-  const [pegawai, setPegawai] = useState([]);
+const EditKepegawaian = () => {
+  const [statusKepegawaian, setStatusKepegawaian] = useState("");
+  const [jabatan, setJabatan] = useState("");
+  const [tmtJabatan, setTmtJabatan] = useState("");
+  const [bagianKerja, setBagianKerja] = useState("");
+  const [eselon, setEselon] = useState("");
+  const [angkatanPejim, setAngkatanPejim] = useState("");
+  const [ppns, setPpns] = useState("");
+  const [tmtPensiun, setTmtPensiun] = useState("");
+  const [namaDenganGelar, setNamaDenganGelar] = useState("");
+  const [nip, setNip] = useState("");
+  const { id } = useParams();
 
   const [loading, setLoading] = useState(false);
   const { currentColor, currentMode } = useStateContext();
@@ -34,84 +35,62 @@ const AddFisik = () => {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
-      getPegawai();
+      getKepegawaianById();
     } else {
       navigate("/");
     }
   }, [navigate]);
 
-  const getPegawai = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("accessToken");
-      const apiUrl = process.env.REACT_APP_URL_API;
-
-      const [pegawaiResponse, fisikResponse] = await Promise.all([
-        axios.get(`${apiUrl}/pegawai`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${apiUrl}/fisik`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
-
-      const existingIds = new Set(
-        (fisikResponse.data || []).map((item) => item.idPegawai),
-      );
-
-      const availablePegawai = (pegawaiResponse.data || []).filter(
-        (item) => !existingIds.has(item.id),
-      );
-
-      setPegawai(availablePegawai);
-    } catch (err) {
-      console.error("Error fetching pegawai:", err);
-      setPegawai([]);
-    } finally {
-      setLoading(false);
-    }
+  const getKepegawaianById = async () => {
+    const token = localStorage.getItem("accessToken");
+    const response = await axios.get(
+      `http://localhost:5000/kepegawaian/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    setStatusKepegawaian(response.data.statusKepegawaian);
+    setJabatan(response.data.jabatan);
+    setTmtJabatan(response.data.tmtJabatan.split('T')[0]);
+    setBagianKerja(response.data.bagianKerja);
+    setEselon(response.data.eselon);
+    setAngkatanPejim(response.data.angkatanPejim);
+    setPpns(response.data.ppns === "YA");
+    setTmtPensiun(response.data.tmtPensiun.split('T')[0]);
+    setNamaDenganGelar(response.data.pegawai.namaDenganGelar);
+    setNip(response.data.pegawai.nip);
   };
 
-  const saveFisik = async (e) => {
+  const updateKepegawaian = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    const formData = new FormData();
+    formData.append("statusKepegawaian", statusKepegawaian);
+    formData.append("jabatan", jabatan);
+    formData.append("tmtJabatan", tmtJabatan);
+    formData.append("bagianKerja", bagianKerja);
+    formData.append("eselon", eselon);
+    formData.append("angkatanPejim", angkatanPejim);
+    formData.append("ppns", ppns);
+    formData.append("tmtPensiun", tmtPensiun);
 
-    const jsonData = {
-      idPegawai,
-      tinggiBadan,
-      beratBadan,
-      jenisRambut,
-      warnaRambut,
-      bentukWajah,
-      warnaKulit,
-      ciriKhusus,
-    };
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      jsonData[key] = value;
+    });
 
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await axios.post(
-        "http://localhost:5000/fisik",
-        jsonData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+      await axios.patch(`http://localhost:5000/kepegawaian/${id}`, jsonData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      );
-      console.log("Response dari Server:", response);
-      setLoading(false);
-      navigate("/fisik");
+      });
+      navigate("/kepegawaian");
     } catch (error) {
-      setLoading(false);
-      console.error(
-        "Error:",
-        error.response ? error.response.data : error.message,
-      );
-      alert(
-        "Terjadi kesalahan: " +
-          (error.response?.data?.message || error.message),
-      );
+      console.log(error);
     }
   };
 
@@ -168,7 +147,7 @@ const AddFisik = () => {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <button
-                onClick={() => navigate("/fisik")}
+                onClick={() => navigate("/kepegawaian")}
                 className="p-2 rounded-lg transition-all duration-200 hover:scale-110"
                 style={{
                   background: isDark
@@ -186,7 +165,8 @@ const AddFisik = () => {
                   isDark ? "text-white" : "text-gray-900"
                 }`}
               >
-                Tambah Data <span style={{ color: currentColor }}>Fisik</span>
+                Edit Data{" "}
+                <span style={{ color: currentColor }}>Kepegawaian</span>
               </h1>
             </div>
             <p
@@ -195,14 +175,14 @@ const AddFisik = () => {
                 color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)",
               }}
             >
-              Formulir Penambahan Data Ciri-Ciri Fisik Pegawai - Kantor Imigrasi
-              Kelas II TPI Lhokseumawe
+              Formulir Pengeditan Data Kepegawaian - Kantor Imigrasi Kelas
+              II TPI Lhokseumawe
             </p>
           </div>
         </div>
 
         {/* Form Card */}
-        <form onSubmit={saveFisik}>
+        <form onSubmit={updateKepegawaian}>
           <div
             className="rounded-2xl overflow-hidden"
             style={{
@@ -222,7 +202,7 @@ const AddFisik = () => {
             />
 
             <div className="p-8">
-              {/* ── Section 0: Pilih Pegawai ── */}
+              {/* ── Section 0: Informasi Pegawai ── */}
               <div className="mb-8">
                 <div
                   className="pb-4 border-b"
@@ -237,7 +217,7 @@ const AddFisik = () => {
                     style={{ color: currentColor }}
                   >
                     <BsPersonFill className="w-8 h-8 dark:text-white" />
-                    Pilih Pegawai
+                    Informasi Pegawai
                   </h2>
                   <p
                     className="text-xs mt-1"
@@ -252,7 +232,7 @@ const AddFisik = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* Nama Pegawai */}
+                  {/* Nama Lengkap */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -262,306 +242,49 @@ const AddFisik = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Nama Pegawai <span style={{ color: "#ef4444" }}>*</span>
+                      Nama Lengkap
                     </label>
-                    <select
-                      name="namaPegawai"
-                      required
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                    <div
+                      className="w-full py-3 rounded-xl text-sm transition-all duration-200"
                       style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.12)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
+                        minHeight: 48,
                       }}
-                      value={idPegawai === "" ? "" : idPegawai.toString()}
-                      onChange={(e) => setIdPegawai(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.15)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.12)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                      disabled={pegawai.length === 0}
                     >
-                      <option value="" disabled style={{ color: "black" }}>
-                        {pegawai.length > 0
-                          ? "-- Pilih Nama Pegawai --"
-                          : "Tidak ada pegawai tanpa data kepegawaian"}
-                      </option>
-                      {pegawai.map((item) => (
-                        <option
-                          key={item.id}
-                          value={item.id}
-                          style={{ color: "black" }}
-                        >
-                          {item.namaDenganGelar || item.nama}
-                        </option>
-                      ))}
-                    </select>
+                      <p className="text-base font-medium break-words">
+                        {namaDenganGelar || "-"}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* NIP */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      NIP
+                    </label>
+                    <div
+                      className="w-full py-3 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        color: isDark ? "white" : "black",
+                        minHeight: 48,
+                      }}
+                    >
+                      <p className="text-base font-medium break-words">
+                        {nip || "-"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* ── Section 1: Ukuran Tubuh ── */}
-              <div className="mb-8">
-                <div
-                  className="pb-4 border-b"
-                  style={{
-                    borderColor: isDark
-                      ? "rgba(56,139,255,.2)"
-                      : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.2)`,
-                  }}
-                >
-                  <h2
-                    className="text-lg font-bold flex items-center gap-2"
-                    style={{ color: currentColor }}
-                  >
-                    <span className="text-xl">📏</span>
-                    Ukuran Tubuh
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* Tinggi Badan */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Tinggi Badan (cm){" "}
-                      <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="tinggiBadan"
-                      type="number"
-                      required
-                      placeholder="Contoh: 170"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={tinggiBadan}
-                      onChange={(e) => setTinggiBadan(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* Berat Badan */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Berat Badan (kg){" "}
-                      <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="beratBadan"
-                      type="number"
-                      required
-                      placeholder="Contoh: 65"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={beratBadan}
-                      onChange={(e) => setBeratBadan(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Section 2: Ciri-Ciri Rambut ── */}
-              <div className="mb-8">
-                <div
-                  className="pb-4 border-b"
-                  style={{
-                    borderColor: isDark
-                      ? "rgba(56,139,255,.2)"
-                      : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.2)`,
-                  }}
-                >
-                  <h2
-                    className="text-lg font-bold flex items-center gap-2"
-                    style={{ color: currentColor }}
-                  >
-                    <span className="text-xl">💇</span>
-                    Ciri-Ciri Rambut
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* Jenis Rambut */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Jenis Rambut <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <select
-                      name="jenisRambut"
-                      required
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={jenisRambut}
-                      onChange={(e) => setJenisRambut(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    >
-                      <option value="">-- Pilih Jenis Rambut --</option>
-                      <option value="lurus" style={{ color: "black" }}>
-                        Lurus
-                      </option>
-                      <option value="bergelombang" style={{ color: "black" }}>
-                        Bergelombang
-                      </option>
-                      <option value="keriting" style={{ color: "black" }}>
-                        Keriting
-                      </option>
-                      <option value="ikal" style={{ color: "black" }}>
-                        Ikal
-                      </option>
-                    </select>
-                  </div>
-
-                  {/* Warna Rambut */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Warna Rambut <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <select
-                      name="warnaRambut"
-                      required
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={warnaRambut}
-                      onChange={(e) => setWarnaRambut(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    >
-                      <option value="">-- Pilih Warna Rambut --</option>
-                      <option value="hitam" style={{ color: "black" }}>
-                        Hitam
-                      </option>
-                      <option value="coklat" style={{ color: "black" }}>
-                        Coklat
-                      </option>
-                      <option value="pirang" style={{ color: "black" }}>
-                        Pirang
-                      </option>
-                      <option value="merah" style={{ color: "black" }}>
-                        Merah
-                      </option>
-                      <option value="uban" style={{ color: "black" }}>
-                        Uban
-                      </option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Section 3: Ciri-Ciri Wajah & Kulit ── */}
+              {/* ── Section 1: Status Kepegawaian ── */}
               <div className="mb-8">
                 <div
                   className="pb-4 border-b"
@@ -576,12 +299,159 @@ const AddFisik = () => {
                     style={{ color: currentColor }}
                   >
                     <BsPersonFill className="w-8 h-8 dark:text-white" />
-                    Ciri-Ciri Wajah & Kulit
+                    Status Kepegawaian
+                  </h2>
+                  <p
+                    className="text-xs mt-1"
+                    style={{
+                      color: isDark
+                        ? "rgba(255,255,255,.35)"
+                        : "rgba(0,0,0,.5)",
+                    }}
+                  >
+                    Informasi status kepegawaian
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6 mt-6">
+                  {/* Status Kepegawaian */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      Status Kepegawaian{" "}
+                      <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <select
+                      name="statusKepegawaian"
+                      required
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={
+                        statusKepegawaian === ""
+                          ? ""
+                          : statusKepegawaian.toString()
+                      }
+                      onChange={(e) => setStatusKepegawaian(e.target.value)}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.15)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                    >
+                      <option value="" style={{ color: "black" }}>
+                        -- Pilih Status Kepegawaian --
+                      </option>
+                      <option value="PPNS" style={{ color: "black" }}>
+                        PNS
+                      </option>
+                      <option value="CPNS" style={{ color: "black" }}>
+                        CPNS
+                      </option>
+                      <option value="PPPK" style={{ color: "black" }}>
+                        PPPK
+                      </option>
+                      <option value="Out Sourcing" style={{ color: "black" }}>
+                        Out Sourcing
+                      </option>
+                    </select>
+                  </div>
+
+                  {/* PPNS */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      PPNS <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <select
+                      name="ppns"
+                      required
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={ppns === "" ? "" : ppns.toString()}
+                      onChange={(e) => setPpns(e.target.value === "true")}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.15)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                    >
+                      <option value="" style={{ color: "black" }}>
+                        -- Pilih Status PPNS --
+                      </option>
+                      <option value="true" style={{ color: "black" }}>
+                        YA
+                      </option>
+                      <option value="false" style={{ color: "black" }}>
+                        TIDAK
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Section 2: Data Jabatan ── */}
+              <div className="mb-8">
+                <div
+                  className="pb-4 border-b"
+                  style={{
+                    borderColor: isDark
+                      ? "rgba(56,139,255,.2)"
+                      : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.2)`,
+                  }}
+                >
+                  <h2
+                    className="text-lg font-bold flex items-center gap-2"
+                    style={{ color: currentColor }}
+                  >
+                    <BsFillTelephoneFill className="w-7 h-7 dark:text-white" />
+                    Data Jabatan
                   </h2>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* Bentuk Wajah */}
+                  {/* Jabatan */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -591,11 +461,13 @@ const AddFisik = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Bentuk Wajah <span style={{ color: "#ef4444" }}>*</span>
+                      Jabatan <span style={{ color: "#ef4444" }}>*</span>
                     </label>
-                    <select
-                      name="bentukWajah"
+                    <input
+                      name="jabatan"
+                      type="text"
                       required
+                      placeholder="Contoh: Kepala Seksi TIKKIM"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
                         background: isDark
@@ -604,8 +476,8 @@ const AddFisik = () => {
                         border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
                       }}
-                      value={bentukWajah}
-                      onChange={(e) => setBentukWajah(e.target.value)}
+                      value={jabatan}
+                      onChange={(e) => setJabatan(e.target.value)}
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
@@ -620,27 +492,10 @@ const AddFisik = () => {
                           ? "rgba(255,255,255,.05)"
                           : "rgba(0,0,0,.03)";
                       }}
-                    >
-                      <option value="">-- Pilih Bentuk Wajah --</option>
-                      <option value="bulat" style={{ color: "black" }}>
-                        Bulat
-                      </option>
-                      <option value="lonjong" style={{ color: "black" }}>
-                        Lonjong
-                      </option>
-                      <option value="persegi" style={{ color: "black" }}>
-                        Persegi
-                      </option>
-                      <option value="hati" style={{ color: "black" }}>
-                        Hati
-                      </option>
-                      <option value="berlian" style={{ color: "black" }}>
-                        Berlian
-                      </option>
-                    </select>
+                    />
                   </div>
 
-                  {/* Warna Kulit */}
+                  {/* TMT Jabatan */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -650,10 +505,11 @@ const AddFisik = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Warna Kulit <span style={{ color: "#ef4444" }}>*</span>
+                      TMT Jabatan <span style={{ color: "#ef4444" }}>*</span>
                     </label>
-                    <select
-                      name="warnaKulit"
+                    <input
+                      name="tmtJabatan"
+                      type="date"
                       required
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
@@ -663,8 +519,8 @@ const AddFisik = () => {
                         border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
                       }}
-                      value={warnaKulit}
-                      onChange={(e) => setWarnaKulit(e.target.value)}
+                      value={tmtJabatan}
+                      onChange={(e) => setTmtJabatan(e.target.value)}
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
@@ -679,28 +535,11 @@ const AddFisik = () => {
                           ? "rgba(255,255,255,.05)"
                           : "rgba(0,0,0,.03)";
                       }}
-                    >
-                      <option value="">-- Pilih Warna Kulit --</option>
-                      <option value="putih" style={{ color: "black" }}>
-                        Putih
-                      </option>
-                      <option value="kuning langsat" style={{ color: "black" }}>
-                        Kuning Langsat
-                      </option>
-                      <option value="sawo matang" style={{ color: "black" }}>
-                        Sawo Matang
-                      </option>
-                      <option value="coklat" style={{ color: "black" }}>
-                        Coklat
-                      </option>
-                      <option value="hitam" style={{ color: "black" }}>
-                        Hitam
-                      </option>
-                    </select>
+                    />
                   </div>
 
-                  {/* Ciri Khusus */}
-                  <div className="col-span-2">
+                  {/* Bagian Kerja */}
+                  <div>
                     <label
                       className="block text-sm font-semibold mb-2"
                       style={{
@@ -709,11 +548,13 @@ const AddFisik = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Ciri Khusus
+                      Bagian Kerja <span style={{ color: "#ef4444" }}>*</span>
                     </label>
-                    <textarea
-                      name="ciriKhusus"
-                      placeholder="Contoh: Tanda lahir di telinga kiri, bekas luka di dahi"
+                    <input
+                      name="bagianKerja"
+                      type="text"
+                      required
+                      placeholder="Contoh: Seksi Lalu Lintas Keimigrasian"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
                         background: isDark
@@ -721,10 +562,194 @@ const AddFisik = () => {
                           : "rgba(0,0,0,.03)",
                         border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
-                        minHeight: "100px",
                       }}
-                      value={ciriKhusus}
-                      onChange={(e) => setCiriKhusus(e.target.value)}
+                      value={bagianKerja}
+                      onChange={(e) => setBagianKerja(e.target.value)}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.1)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.05)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                    />
+                  </div>
+
+                  {/* Eselon */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      Eselon <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <select
+                      name="eselon"
+                      required
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={eselon === "" ? "" : eselon.toString()}
+                      onChange={(e) => setEselon(e.target.value)}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.15)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                    >
+                      <option value="" style={{ color: "black" }}>
+                        -- Pilih Eselon --
+                      </option>
+                      <option value="Non Eselon" style={{ color: "black" }}>
+                        Non Eselon
+                      </option>
+                      <option value="Eselon V" style={{ color: "black" }}>
+                        Eselon V
+                      </option>
+                      <option value="Eselon IV/b" style={{ color: "black" }}>
+                        Eselon IV/b
+                      </option>
+                      <option value="Eselon IV/a" style={{ color: "black" }}>
+                        Eselon IV/a
+                      </option>
+                      <option value="Eselon III/b" style={{ color: "black" }}>
+                        Eselon III/b
+                      </option>
+                      <option value="Eselon III/a" style={{ color: "black" }}>
+                        Eselon III/a
+                      </option>
+                      <option value="Eselon II/b" style={{ color: "black" }}>
+                        Eselon II/b
+                      </option>
+                      <option value="Eselon II/a" style={{ color: "black" }}>
+                        Eselon II/a
+                      </option>
+                      <option value="Eselon I/b" style={{ color: "black" }}>
+                        Eselon I/b
+                      </option>
+                      <option value="Eselon I/a" style={{ color: "black" }}>
+                        Eselon I/a
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Section 3: Data Pendidikan Keimigrasian & Pensiun ── */}
+              <div className="mb-8">
+                <div
+                  className="pb-4 border-b"
+                  style={{
+                    borderColor: isDark
+                      ? "rgba(56,139,255,.2)"
+                      : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.2)`,
+                  }}
+                >
+                  <h2
+                    className="text-lg font-bold flex items-center gap-2"
+                    style={{ color: currentColor }}
+                  >
+                    <span className="text-xl">📋</span>
+                    Data Pendidikan Keimigrasian & Pensiun
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6 mt-6">
+                  {/* Angkatan PEJIM */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      Angkatan PEJIM <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <input
+                      name="angkatanPejim"
+                      type="text"
+                      required
+                      placeholder="Contoh: Angkatan 15"
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.05)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={angkatanPejim}
+                      onChange={(e) => setAngkatanPejim(e.target.value)}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.1)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.05)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                    />
+                  </div>
+
+                  {/* TMT Pensiun */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      TMT Pensiun <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <input
+                      name="tmtPensiun"
+                      type="date"
+                      required
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.05)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={tmtPensiun}
+                      onChange={(e) => setTmtPensiun(e.target.value)}
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
@@ -767,7 +792,7 @@ const AddFisik = () => {
             >
               <button
                 type="button"
-                onClick={() => navigate("/fisik")}
+                onClick={() => navigate("/kepegawaian")}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105"
                 style={{
                   background: isDark
@@ -800,7 +825,7 @@ const AddFisik = () => {
                     Menyimpan...
                   </>
                 ) : (
-                  <>Simpan</>
+                  <>Simpan Perubahan</>
                 )}
               </button>
             </div>
@@ -811,4 +836,4 @@ const AddFisik = () => {
   );
 };
 
-export default AddFisik;
+export default EditKepegawaian;

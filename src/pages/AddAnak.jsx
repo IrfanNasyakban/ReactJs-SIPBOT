@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../features/authSlice";
 import { useStateContext } from "../contexts/ContextProvider";
+
+import { BsPersonFill } from "react-icons/bs";
 import { HiArrowLeft } from "react-icons/hi";
 
 const AddAnak = () => {
@@ -38,24 +40,11 @@ const AddAnak = () => {
       const token = localStorage.getItem("accessToken");
       const apiUrl = process.env.REACT_APP_URL_API;
 
-      const [pegawaiResponse, anakResponse] = await Promise.all([
-        axios.get(`${apiUrl}/pegawai`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axios.get(`${apiUrl}/anak`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+      const pegawaiResponse = await axios.get(`${apiUrl}/pegawai`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      const existingIds = new Set(
-        (anakResponse.data || []).map((item) => item.idPegawai),
-      );
-
-      const availablePegawai = (pegawaiResponse.data || []).filter(
-        (item) => !existingIds.has(item.id),
-      );
-
-      setPegawai(availablePegawai);
+      setPegawai(pegawaiResponse.data || []);
     } catch (err) {
       console.error("Error fetching pegawai:", err);
       setPegawai([]);
@@ -154,7 +143,7 @@ const AddAnak = () => {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <button
-                onClick={() => navigate("/pegawai")}
+                onClick={() => navigate("/anak")}
                 className="p-2 rounded-lg transition-all duration-200 hover:scale-110"
                 style={{
                   background: isDark
@@ -173,7 +162,7 @@ const AddAnak = () => {
                 }`}
               >
                 Tambah Data{" "}
-                <span style={{ color: currentColor }}>Pasangan</span>
+                <span style={{ color: currentColor }}>Anak</span>
               </h1>
             </div>
             <p
@@ -223,7 +212,7 @@ const AddAnak = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">👤</span>
+                    <BsPersonFill className="w-8 h-8 dark:text-white" />
                     Pilih Pegawai
                   </h2>
                   <p
@@ -335,7 +324,7 @@ const AddAnak = () => {
                       name="namaAnak"
                       type="text"
                       required
-                      placeholder="Contoh: Ahmad Sulaiman, S.E. atau (-) jika belum menikah"
+                      placeholder="Contoh: John Doe atau (-) jika belum memiliki anak"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
                         background: isDark
@@ -388,7 +377,7 @@ const AddAnak = () => {
             >
               <button
                 type="button"
-                onClick={() => navigate("/pegawai")}
+                onClick={() => navigate("/anak")}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105"
                 style={{
                   background: isDark

@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../features/authSlice";
 import { useStateContext } from "../contexts/ContextProvider";
+import { BsFillTelephoneFill, BsPersonFill } from "react-icons/bs";
 import { HiArrowLeft } from "react-icons/hi";
 
 const AddPangkat = () => {
@@ -234,7 +235,7 @@ const AddPangkat = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">👤</span>
+                    <BsPersonFill className="w-8 h-8 dark:text-white"/>
                     Pilih Pegawai
                   </h2>
                   <p
@@ -324,7 +325,7 @@ const AddPangkat = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">👤</span>
+                    <BsPersonFill className="w-8 h-8 dark:text-white"/>
                     Data Pangkat & Golongan
                   </h2>
                 </div>
@@ -478,7 +479,7 @@ const AddPangkat = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">📞</span>
+                    <BsFillTelephoneFill className="w-7 h-7 dark:text-white" />
                     Surat Keputusan Pangkat
                   </h2>
                 </div>

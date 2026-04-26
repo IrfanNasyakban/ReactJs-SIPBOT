@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../features/authSlice";
 import { useStateContext } from "../contexts/ContextProvider";
+
+import { BsPersonFill } from "react-icons/bs";
 import { HiArrowLeft } from "react-icons/hi";
 
 const AddPegawai = () => {
@@ -209,7 +211,7 @@ const AddPegawai = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">👤</span>
+                    <BsPersonFill className="w-8 h-8 dark:text-white"/>
                     Data Pribadi
                   </h2>
                   <p
@@ -530,7 +532,7 @@ const AddPegawai = () => {
                         e.target.style.background = isDark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.03)";
                       }}
                     >
-                      <option value="" style={{color: "black"}}>🕌 Pilih Agama</option>
+                      <option value="" style={{color: "black"}}>Pilih Agama</option>
                       <option value="Islam" style={{color: "black"}}>Islam</option>
                       <option value="Kristen Protestan" style={{color: "black"}}>Kristen Protestan</option>
                       <option value="Katolik" style={{color: "black"}}>Katolik</option>
