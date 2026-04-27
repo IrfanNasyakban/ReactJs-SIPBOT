@@ -158,8 +158,8 @@ const EditIdentitas = () => {
             <p
               className="text-xs ml-11 mt-1"
               style={{
-                color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)",
-              }}
+                  color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)",
+                }}
             >
               Formulir Perubahan Data Identitas Baru - Kantor Imigrasi Kelas II
               TPI Lhokseumawe

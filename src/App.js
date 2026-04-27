@@ -5,6 +5,8 @@ import { Navbar, Footer, Sidebar, ThemeSettings } from "./components";
 import { 
   Page404, 
   LoginPage, 
+  ChangePassword,
+  FilterPegawai,
   Dashboard, 
   ListPegawai, 
   ListKepegawaian, 
@@ -104,7 +106,9 @@ const AppContent = () => {
 
             <Routes>
               <Route path="/" element={<LoginPage />} />
+              <Route path="/change-password" element={<ChangePassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/filter" element={<FilterPegawai />} />
               <Route path="/pegawai" element={<ListPegawai />} />
               <Route path="/kepegawaian" element={<ListKepegawaian />} />
               <Route path="/pangkat" element={<ListPangkat />} />
