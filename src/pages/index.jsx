@@ -36,3 +36,4 @@ export { default as EditFisik } from './EditPage/EditFisik';
 export { default as EditUkuran } from './EditPage/EditUkuran';
 export { default as EditPasangan } from './EditPage/EditPasangan';
 export { default as EditAnak } from './EditPage/EditAnak';
+export { default as ViewPegawai } from './ViewPegawai';

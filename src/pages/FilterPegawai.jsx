@@ -608,19 +608,19 @@ const FilterPegawai = () => {
                     <tr style={{
                       background: isDark
                         ? "linear-gradient(135deg,#1a2640,#111827)"
-                        : "linear-gradient(135deg,#1e3a5f,#1d4ed8)",
+                        : "#edf0f5",
                     }}>
                       <th className="text-left px-5 py-3.5 text-white text-xs font-bold uppercase tracking-wider whitespace-nowrap"
                         style={{ borderRight: "1px solid rgba(255,255,255,.08)" }}>
                         No
                       </th>
                       {appliedCols.map((col, ci) => {
-                        const gc = GROUP_COLORS[col.group] || "#fff";
+                        const gc = "#000000";
                         return (
                           <th key={col.key}
                             className="text-left px-5 py-3.5 text-xs font-bold uppercase tracking-wider whitespace-nowrap"
                             style={{
-                              color: gc,
+                              color: isDark ? "#ffffff" : gc,
                               borderRight: ci < appliedCols.length - 1
                                 ? "1px solid rgba(255,255,255,.07)" : "none",
                             }}

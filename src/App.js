@@ -40,7 +40,8 @@ import {
   EditFisik,
   EditUkuran,
   EditPasangan,
-  EditAnak
+  EditAnak,
+  ViewPegawai,
 
 } from "./pages";
 
@@ -142,6 +143,7 @@ const AppContent = () => {
               <Route path="/ukuran/edit/:id" element={<EditUkuran />} />
               <Route path="/pasangan/edit/:id" element={<EditPasangan />} />
               <Route path="/anak/edit/:id" element={<EditAnak />} />
+              <Route path="/pegawai/:id" element={<ViewPegawai />} />
               
               <Route path="/page-not-found" element={<Page404 />} />
               <Route path="*" element={<Page404 />} />
