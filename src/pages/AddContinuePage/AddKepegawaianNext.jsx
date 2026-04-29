@@ -1,30 +1,24 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { getMe } from "../features/authSlice";
-import { useStateContext } from "../contexts/ContextProvider";
-
-import { BsPersonFill } from "react-icons/bs";
+import { useNavigate, useLocation } from "react-router-dom";
+import { getMe } from "../../features/authSlice";
+import { useStateContext } from "../../contexts/ContextProvider";
 import { HiArrowLeft } from "react-icons/hi";
+import { BsPersonFill, BsFillTelephoneFill } from "react-icons/bs";
 
-const AddPegawai = () => {
-  const [nip, setNip] = useState("");
-  const [nama, setNama] = useState("");
-  const [gelarDepan, setGelarDepan] = useState("");
-  const [gelarBelakang, setGelarBelakang] = useState("");
-  const [namaDenganGelar, setNamaDenganGelar] = useState("");
-  const [tempatLahir, setTempatLahir] = useState("");
-  const [tanggalLahir, setTanggalLahir] = useState("");
-  const [gender, setGender] = useState("");
-  const [agama, setAgama] = useState("");
-  const [statusPegawai, setStatusPegawai] = useState("");
-  const [emailPribadi, setEmailPribadi] = useState("");
-  const [emailDinas, setEmailDinas] = useState("");
-  const [noHp, setNoHp] = useState("");
-  const [hobi, setHobi] = useState("");
+const AddKepegawaianNext = () => {
+  const [statusKepegawaian, setStatusKepegawaian] = useState("");
+  const [jabatan, setJabatan] = useState("");
+  const [tmtJabatan, setTmtJabatan] = useState("");
+  const [bagianKerja, setBagianKerja] = useState("");
+  const [eselon, setEselon] = useState("");
+  const [angkatanPejim, setAngkatanPejim] = useState("");
+  const [ppns, setPpns] = useState("");
+  const [tmtPensiun, setTmtPensiun] = useState("");
 
-  const [idPegawai, setIdPegawai] = useState(null);
+  const [idPegawai, setIdPegawai] = useState("");
+  const [namaPegawai, setNamaPegawai] = useState("");
 
   const [loading, setLoading] = useState(false);
   const { currentColor, currentMode } = useStateContext();
@@ -32,6 +26,14 @@ const AddPegawai = () => {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state) {
+      setIdPegawai(location.state.idPegawai || "");
+      setNamaPegawai(location.state.namaPegawai || "");
+    }
+  }, [location.state]);
 
   useEffect(() => {
     dispatch(getMe());
@@ -46,58 +48,43 @@ const AddPegawai = () => {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    const formattedName = [
-      gelarDepan.trim(),
-      `${nama.trim()},`,
-      gelarBelakang.trim(),
-    ]
-      .filter(Boolean)
-      .join(" ");
-
-    setNamaDenganGelar(formattedName);
-  }, [gelarDepan, nama, gelarBelakang]);
-
-  const savePegawai = async (e) => {
+  const saveKepegawaian = async (e) => {
     e.preventDefault();
     setLoading(true);
 
+    if (!idPegawai) {
+      alert("ID Pegawai tidak ditemukan. Silakan tambahkan data pegawai terlebih dahulu.");
+      setLoading(false);
+      return;
+    }
+
     const jsonData = {
-      nip,
-      nama,
-      gelarDepan,
-      gelarBelakang,
-      namaDenganGelar,
-      tempatLahir,
-      tanggalLahir,
-      gender,
-      agama,
-      statusPegawai,
-      emailPribadi,
-      emailDinas,
-      noHp,
-      hobi,
+      idPegawai: Number(idPegawai),
+      statusKepegawaian,
+      jabatan,
+      tmtJabatan,
+      bagianKerja,
+      eselon,
+      angkatanPejim,
+      ppns,
+      tmtPensiun,
     };
 
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await axios.post(
-        "http://localhost:5000/pegawai",
-        jsonData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+      const apiUrl = process.env.REACT_APP_URL_API;
+      const response = await axios.post(`${apiUrl}/kepegawaian`, jsonData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      );
+      });
       console.log("Response dari Server:", response);
-      setIdPegawai(response.data.id);
       setLoading(false);
-      navigate("/next/add/kepegawaian", {
+      navigate("/next/add/pangkat", {
         state: {
-          idPegawai: response.data.id,
-          namaPegawai: namaDenganGelar,
+          idPegawai: idPegawai,
+          namaPegawai: namaPegawai,
         },
       });
     } catch (error) {
@@ -124,9 +111,9 @@ const AddPegawai = () => {
         className="fixed inset-0 pointer-events-none z-0"
         style={{
           backgroundImage: `
-            linear-gradient(${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px),
-            linear-gradient(90deg, ${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px)
-          `,
+                    linear-gradient(${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px),
+                    linear-gradient(90deg, ${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px)
+                  `,
           backgroundSize: "48px 48px",
         }}
       />
@@ -184,7 +171,8 @@ const AddPegawai = () => {
                   isDark ? "text-white" : "text-gray-900"
                 }`}
               >
-                Tambah Data <span style={{ color: currentColor }}>Pegawai</span>
+                Tambah Data{" "}
+                <span style={{ color: currentColor }}>Kepegawaian</span>
               </h1>
             </div>
             <p
@@ -193,14 +181,14 @@ const AddPegawai = () => {
                 color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)",
               }}
             >
-              Formulir Penambahan Data Pegawai Baru - Kantor Imigrasi Kelas II
-              TPI Lhokseumawe
+              Formulir Penambahan Data Kepegawaian Baru - Kantor Imigrasi Kelas
+              II TPI Lhokseumawe
             </p>
           </div>
         </div>
 
         {/* Form Card */}
-        <form onSubmit={savePegawai}>
+        <form onSubmit={saveKepegawaian}>
           <div
             className="rounded-2xl overflow-hidden"
             style={{
@@ -220,7 +208,56 @@ const AddPegawai = () => {
             />
 
             <div className="p-8">
-              {/* ── Section 1: Data Pribadi ── */}
+              {/* ── Section 0: Data Pegawai ── */}
+              <div className="mb-8">
+                <div
+                  className="pb-4 border-b"
+                  style={{
+                    borderColor: isDark
+                      ? "rgba(56,139,255,.2)"
+                      : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.2)`,
+                  }}
+                >
+                  <h2
+                    className="text-lg font-bold flex items-center gap-2"
+                    style={{ color: currentColor }}
+                  >
+                    <BsPersonFill className="w-8 h-8 dark:text-white"/>
+                    Data Pegawai
+                  </h2>
+                  <p
+                    className="text-xs mt-1"
+                    style={{
+                      color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)",
+                    }}
+                  >
+                    Informasi pegawai yang baru ditambahkan
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6 mt-6">
+                  {/* ID Pegawai (Hidden) */}
+                  <input
+                    type="hidden"
+                    value={idPegawai}
+                  />
+                  
+                  {/* Nama Pegawai (Read Only) */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark ? "rgba(255,255,255,.8)" : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      Nama Pegawai <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <p className="dark:text-white text-xl font-bold">{namaPegawai}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Section 1: Status Kepegawaian ── */}
               <div className="mb-8">
                 <div
                   className="pb-4 border-b"
@@ -235,7 +272,7 @@ const AddPegawai = () => {
                     style={{ color: currentColor }}
                   >
                     <BsPersonFill className="w-8 h-8 dark:text-white" />
-                    Data Pribadi
+                    Status Kepegawaian
                   </h2>
                   <p
                     className="text-xs mt-1"
@@ -245,12 +282,12 @@ const AddPegawai = () => {
                         : "rgba(0,0,0,.5)",
                     }}
                   >
-                    Informasi pribadi dan identitas pegawai
+                    Informasi status kepegawaian
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* NIP */}
+                  {/* Status Kepegawaian */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -260,375 +297,11 @@ const AddPegawai = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      NIP <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="nip"
-                      type="text"
-                      required
-                      placeholder="Masukkan nomor induk pegawai"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={nip}
-                      onChange={(e) => setNip(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* Nama Lengkap */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Nama Lengkap <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="nama"
-                      type="text"
-                      required
-                      placeholder="Masukkan nama lengkap"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={nama}
-                      onChange={(e) => setNama(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* Gelar Depan */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Gelar Depan
-                    </label>
-                    <input
-                      name="gelarDepan"
-                      type="text"
-                      placeholder="Contoh: Dr., Ir., Prof."
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={gelarDepan}
-                      onChange={(e) => setGelarDepan(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* Gelar Belakang */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Gelar Belakang
-                    </label>
-                    <input
-                      name="gelarBelakang"
-                      type="text"
-                      placeholder="Contoh: S.H., M.Si., Ph.D"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={gelarBelakang}
-                      onChange={(e) => setGelarBelakang(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* Nama Dengan Gelar */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Nama Dengan Gelar
-                    </label>
-                    <input
-                      name="namaDenganGelar"
-                      type="text"
-                      readOnly
-                      className="w-full px-4 py-2.5 rounded-xl text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(243,244,246,.9)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={namaDenganGelar}
-                    />
-                  </div>
-
-                  {/* Tempat Lahir */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Tempat Lahir <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="tempatLahir"
-                      type="text"
-                      required
-                      placeholder="Masukkan tempat lahir"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={tempatLahir}
-                      onChange={(e) => setTempatLahir(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* Tanggal Lahir */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Tanggal Lahir <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="tanggalLahir"
-                      type="date"
-                      required
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={tanggalLahir}
-                      onChange={(e) => setTanggalLahir(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* Jenis Kelamin */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-3"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Jenis Kelamin <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <div className="flex gap-3">
-                      <label
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl cursor-pointer font-semibold text-sm transition-all duration-200"
-                        style={{
-                          background:
-                            gender === "Laki-Laki"
-                              ? currentColor
-                              : isDark
-                                ? "rgba(255,255,255,.05)"
-                                : "rgba(0,0,0,.03)",
-                          border: `1.5px solid ${gender === "Laki-Laki" ? currentColor : isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                          color:
-                            gender === "Laki-Laki"
-                              ? "white"
-                              : isDark
-                                ? "rgba(255,255,255,.7)"
-                                : "rgba(0,0,0,.6)",
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          name="gender"
-                          value="Laki-Laki"
-                          required
-                          checked={gender === "Laki-Laki"}
-                          onChange={(e) => setGender(e.target.value)}
-                          className="hidden"
-                        />
-                        <span>♂️</span>
-                        Laki-Laki
-                      </label>
-                      <label
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl cursor-pointer font-semibold text-sm transition-all duration-200"
-                        style={{
-                          background:
-                            gender === "Perempuan"
-                              ? currentColor
-                              : isDark
-                                ? "rgba(255,255,255,.05)"
-                                : "rgba(0,0,0,.03)",
-                          border: `1.5px solid ${gender === "Perempuan" ? currentColor : isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                          color:
-                            gender === "Perempuan"
-                              ? "white"
-                              : isDark
-                                ? "rgba(255,255,255,.7)"
-                                : "rgba(0,0,0,.6)",
-                        }}
-                      >
-                        <input
-                          type="radio"
-                          name="gender"
-                          value="Perempuan"
-                          required
-                          checked={gender === "Perempuan"}
-                          onChange={(e) => setGender(e.target.value)}
-                          className="hidden"
-                        />
-                        <span>♀️</span>
-                        Perempuan
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Agama */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Agama <span style={{ color: "#ef4444" }}>*</span>
+                      Status Kepegawaian{" "}
+                      <span style={{ color: "#ef4444" }}>*</span>
                     </label>
                     <select
-                      name="agama"
+                      name="statusKepegawaian"
                       required
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
@@ -638,8 +311,12 @@ const AddPegawai = () => {
                         border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
                       }}
-                      value={agama}
-                      onChange={(e) => setAgama(e.target.value)}
+                      value={
+                        statusKepegawaian === ""
+                          ? ""
+                          : statusKepegawaian.toString()
+                      }
+                      onChange={(e) => setStatusKepegawaian(e.target.value)}
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
@@ -656,35 +333,78 @@ const AddPegawai = () => {
                       }}
                     >
                       <option value="" style={{ color: "black" }}>
-                        Pilih Agama
+                        -- Pilih Status Kepegawaian --
                       </option>
-                      <option value="Islam" style={{ color: "black" }}>
-                        Islam
+                      <option value="PPNS" style={{ color: "black" }}>
+                        PNS
                       </option>
-                      <option
-                        value="Kristen Protestan"
-                        style={{ color: "black" }}
-                      >
-                        Kristen Protestan
+                      <option value="CPNS" style={{ color: "black" }}>
+                        CPNS
                       </option>
-                      <option value="Katolik" style={{ color: "black" }}>
-                        Katolik
+                      <option value="PPPK" style={{ color: "black" }}>
+                        PPPK
                       </option>
-                      <option value="Hindu" style={{ color: "black" }}>
-                        Hindu
+                      <option value="Out Sourcing" style={{ color: "black" }}>
+                        Out Sourcing
                       </option>
-                      <option value="Buddha" style={{ color: "black" }}>
-                        Buddha
+                    </select>
+                  </div>
+
+                  {/* PPNS */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      PPNS <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <select
+                      name="ppns"
+                      required
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={ppns === "" ? "" : ppns.toString()}
+                      onChange={(e) => setPpns(e.target.value === "true")}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.15)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                    >
+                      <option value="" style={{ color: "black" }}>
+                        -- Pilih Status PPNS --
                       </option>
-                      <option value="Khonghucu" style={{ color: "black" }}>
-                        Khonghucu
+                      <option value="true" style={{ color: "black" }}>
+                        YA
+                      </option>
+                      <option value="false" style={{ color: "black" }}>
+                        TIDAK
                       </option>
                     </select>
                   </div>
                 </div>
               </div>
 
-              {/* ── Section 2: Data Kontak ── */}
+              {/* ── Section 2: Data Jabatan ── */}
               <div className="mb-8">
                 <div
                   className="pb-4 border-b"
@@ -698,23 +418,13 @@ const AddPegawai = () => {
                     className="text-lg font-bold flex items-center gap-2"
                     style={{ color: currentColor }}
                   >
-                    <span className="text-xl">📞</span>
-                    Data Kontak
+                    <BsFillTelephoneFill className="w-7 h-7 dark:text-white" />
+                    Data Jabatan
                   </h2>
-                  <p
-                    className="text-xs mt-1"
-                    style={{
-                      color: isDark
-                        ? "rgba(255,255,255,.35)"
-                        : "rgba(0,0,0,.5)",
-                    }}
-                  >
-                    Informasi kontak dan komunikasi pegawai
-                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* Email Pribadi */}
+                  {/* Jabatan */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -724,101 +434,13 @@ const AddPegawai = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Email Pribadi <span style={{ color: "#ef4444" }}>*</span>
+                      Jabatan <span style={{ color: "#ef4444" }}>*</span>
                     </label>
                     <input
-                      name="emailPribadi"
-                      type="email"
-                      required
-                      placeholder="nama@email.com"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={emailPribadi}
-                      onChange={(e) => setEmailPribadi(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* Email Dinas */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Email Dinas <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="emailDinas"
-                      type="email"
-                      required
-                      placeholder="nama@imigrasi.go.id"
-                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={emailDinas}
-                      onChange={(e) => setEmailDinas(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
-                    />
-                  </div>
-
-                  {/* No Telepon */}
-                  <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Nomor Telepon <span style={{ color: "#ef4444" }}>*</span>
-                    </label>
-                    <input
-                      name="noHp"
+                      name="jabatan"
                       type="text"
                       required
-                      placeholder="08123456789"
+                      placeholder="Contoh: Kepala Seksi TIKKIM"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
                         background: isDark
@@ -827,8 +449,8 @@ const AddPegawai = () => {
                         border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
                       }}
-                      value={noHp}
-                      onChange={(e) => setNoHp(e.target.value)}
+                      value={jabatan}
+                      onChange={(e) => setJabatan(e.target.value)}
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
@@ -846,7 +468,7 @@ const AddPegawai = () => {
                     />
                   </div>
 
-                  {/* Hobi */}
+                  {/* TMT Jabatan */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -856,13 +478,12 @@ const AddPegawai = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Hobi <span style={{ color: "#ef4444" }}>*</span>
+                      TMT Jabatan <span style={{ color: "#ef4444" }}>*</span>
                     </label>
                     <input
-                      name="hobi"
-                      type="text"
+                      name="tmtJabatan"
+                      type="date"
                       required
-                      placeholder="Membaca, Olahraga, etc"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
                         background: isDark
@@ -871,8 +492,8 @@ const AddPegawai = () => {
                         border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
                       }}
-                      value={hobi}
-                      onChange={(e) => setHobi(e.target.value)}
+                      value={tmtJabatan}
+                      onChange={(e) => setTmtJabatan(e.target.value)}
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
@@ -888,11 +509,131 @@ const AddPegawai = () => {
                           : "rgba(0,0,0,.03)";
                       }}
                     />
+                  </div>
+
+                  {/* Bagian Kerja */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      Bagian Kerja <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <input
+                      name="bagianKerja"
+                      type="text"
+                      required
+                      placeholder="Contoh: Seksi Lalu Lintas Keimigrasian"
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.05)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={bagianKerja}
+                      onChange={(e) => setBagianKerja(e.target.value)}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.1)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.05)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                    />
+                  </div>
+
+                  {/* Eselon */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
+                    >
+                      Eselon <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <select
+                      name="eselon"
+                      required
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={eselon === "" ? "" : eselon.toString()}
+                      onChange={(e) => setEselon(e.target.value)}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.15)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.12)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                    >
+                      <option value="" style={{ color: "black" }}>
+                        -- Pilih Eselon --
+                      </option>
+                      <option value="Non Eselon" style={{ color: "black" }}>
+                        Non Eselon
+                      </option>
+                      <option value="Eselon V" style={{ color: "black" }}>
+                        Eselon V
+                      </option>
+                      <option value="Eselon IV/b" style={{ color: "black" }}>
+                        Eselon IV/b
+                      </option>
+                      <option value="Eselon IV/a" style={{ color: "black" }}>
+                        Eselon IV/a
+                      </option>
+                      <option value="Eselon III/b" style={{ color: "black" }}>
+                        Eselon III/b
+                      </option>
+                      <option value="Eselon III/a" style={{ color: "black" }}>
+                        Eselon III/a
+                      </option>
+                      <option value="Eselon II/b" style={{ color: "black" }}>
+                        Eselon II/b
+                      </option>
+                      <option value="Eselon II/a" style={{ color: "black" }}>
+                        Eselon II/a
+                      </option>
+                      <option value="Eselon I/b" style={{ color: "black" }}>
+                        Eselon I/b
+                      </option>
+                      <option value="Eselon I/a" style={{ color: "black" }}>
+                        Eselon I/a
+                      </option>
+                    </select>
                   </div>
                 </div>
               </div>
 
-              {/* ── Section 3: Status Kepegawaian ── */}
+              {/* ── Section 3: Data Pendidikan Keimigrasian & Pensiun ── */}
               <div className="mb-8">
                 <div
                   className="pb-4 border-b"
@@ -907,22 +648,12 @@ const AddPegawai = () => {
                     style={{ color: currentColor }}
                   >
                     <span className="text-xl">📋</span>
-                    Status Kepegawaian
+                    Data Pendidikan Keimigrasian & Pensiun
                   </h2>
-                  <p
-                    className="text-xs mt-1"
-                    style={{
-                      color: isDark
-                        ? "rgba(255,255,255,.35)"
-                        : "rgba(0,0,0,.5)",
-                    }}
-                  >
-                    Status dan aktivasi pegawai
-                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* Status Pegawai */}
+                  {/* Angkatan PEJIM */}
                   <div>
                     <label
                       className="block text-sm font-semibold mb-2"
@@ -932,50 +663,81 @@ const AddPegawai = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Status Pegawai <span style={{ color: "#ef4444" }}>*</span>
+                      Angkatan PEJIM <span style={{ color: "#ef4444" }}>*</span>
                     </label>
-                    <select
-                      name="statusPegawai"
+                    <input
+                      name="angkatanPejim"
+                      type="text"
                       required
+                      placeholder="Contoh: Angkatan 15"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
                         background: isDark
-                          ? "rgba(255,255,255,.12)"
+                          ? "rgba(255,255,255,.05)"
                           : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.15)" : "rgba(0,0,0,.1)"}`,
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
                         color: isDark ? "white" : "black",
                       }}
-                      value={
-                        statusPegawai === "" ? "" : statusPegawai.toString()
-                      }
-                      onChange={(e) =>
-                        setStatusPegawai(e.target.value === "true")
-                      }
+                      value={angkatanPejim}
+                      onChange={(e) => setAngkatanPejim(e.target.value)}
                       onFocus={(e) => {
                         e.target.style.borderColor = currentColor;
                         e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.12)`
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
                           : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
                       }}
                       onBlur={(e) => {
                         e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.15)"
+                          ? "rgba(255,255,255,.1)"
                           : "rgba(0,0,0,.1)";
                         e.target.style.background = isDark
-                          ? "rgba(255,255,255,.12)"
+                          ? "rgba(255,255,255,.05)"
                           : "rgba(0,0,0,.03)";
                       }}
+                    />
+                  </div>
+
+                  {/* TMT Pensiun */}
+                  <div>
+                    <label
+                      className="block text-sm font-semibold mb-2"
+                      style={{
+                        color: isDark
+                          ? "rgba(255,255,255,.8)"
+                          : "rgba(0,0,0,.7)",
+                      }}
                     >
-                      <option value="" style={{ color: "black" }}>
-                        -- Pilih Status Pegawai --
-                      </option>
-                      <option value="true" style={{ color: "black" }}>
-                        Aktif
-                      </option>
-                      <option value="false" style={{ color: "black" }}>
-                        Tidak Aktif
-                      </option>
-                    </select>
+                      TMT Pensiun <span style={{ color: "#ef4444" }}>*</span>
+                    </label>
+                    <input
+                      name="tmtPensiun"
+                      type="date"
+                      required
+                      className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
+                      style={{
+                        background: isDark
+                          ? "rgba(255,255,255,.05)"
+                          : "rgba(0,0,0,.03)",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+                        color: isDark ? "white" : "black",
+                      }}
+                      value={tmtPensiun}
+                      onChange={(e) => setTmtPensiun(e.target.value)}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = currentColor;
+                        e.target.style.background = isDark
+                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
+                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isDark
+                          ? "rgba(255,255,255,.1)"
+                          : "rgba(0,0,0,.1)";
+                        e.target.style.background = isDark
+                          ? "rgba(255,255,255,.05)"
+                          : "rgba(0,0,0,.03)";
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -1036,7 +798,7 @@ const AddPegawai = () => {
                     Menyimpan...
                   </>
                 ) : (
-                  <>Selanjutnya</>
+                  <>Simpan</>
                 )}
               </button>
             </div>
@@ -1047,4 +809,4 @@ const AddPegawai = () => {
   );
 };
 
-export default AddPegawai;
+export default AddKepegawaianNext;

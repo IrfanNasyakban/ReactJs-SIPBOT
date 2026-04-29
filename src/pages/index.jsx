@@ -37,3 +37,14 @@ export { default as EditUkuran } from './EditPage/EditUkuran';
 export { default as EditPasangan } from './EditPage/EditPasangan';
 export { default as EditAnak } from './EditPage/EditAnak';
 export { default as ViewPegawai } from './ViewPegawai';
+
+export { default as AddKepegawaianNext } from './AddContinuePage/AddKepegawaianNext';
+export { default as AddPangkatNext } from './AddContinuePage/AddPangkatNext';
+export { default as AddAlamatNext } from './AddContinuePage/AddAlamatNext';
+export { default as AddIdentitasNext } from './AddContinuePage/AddIdentitasNext';
+export { default as AddRekeningNext } from './AddContinuePage/AddRekeningNext';
+export { default as AddPendidikanNext } from './AddContinuePage/AddPendidikanNext';
+export { default as AddFisikNext } from './AddContinuePage/AddFisikNext';
+export { default as AddUkuranNext } from './AddContinuePage/AddUkuranNext';
+export { default as AddPasanganNext } from './AddContinuePage/AddPasanganNext';
+export { default as AddAnakNext } from './AddContinuePage/AddAnakNext';

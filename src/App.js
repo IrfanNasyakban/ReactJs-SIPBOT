@@ -43,6 +43,17 @@ import {
   EditAnak,
   ViewPegawai,
 
+  AddKepegawaianNext,
+  AddPangkatNext,
+  AddAlamatNext,
+  AddIdentitasNext,
+  AddRekeningNext,
+  AddPendidikanNext,
+  AddFisikNext,
+  AddUkuranNext,
+  AddPasanganNext,
+  AddAnakNext,
+
 } from "./pages";
 
 import { useStateContext } from "./contexts/ContextProvider";
@@ -144,6 +155,17 @@ const AppContent = () => {
               <Route path="/pasangan/edit/:id" element={<EditPasangan />} />
               <Route path="/anak/edit/:id" element={<EditAnak />} />
               <Route path="/pegawai/:id" element={<ViewPegawai />} />
+
+              <Route path="/next/add/kepegawaian" element={<AddKepegawaianNext />} />
+              <Route path="/next/add/pangkat" element={<AddPangkatNext />} />
+              <Route path="/next/add/alamat" element={<AddAlamatNext />} />
+              <Route path="/next/add/identitas" element={<AddIdentitasNext />} />
+              <Route path="/next/add/rekening" element={<AddRekeningNext />} />
+              <Route path="/next/add/pendidikan" element={<AddPendidikanNext />} />
+              <Route path="/next/add/fisik" element={<AddFisikNext />} />
+              <Route path="/next/add/ukuran" element={<AddUkuranNext />} />
+              <Route path="/next/add/pasangan" element={<AddPasanganNext />} />
+              <Route path="/next/add/anak" element={<AddAnakNext />} />
               
               <Route path="/page-not-found" element={<Page404 />} />
               <Route path="*" element={<Page404 />} />
