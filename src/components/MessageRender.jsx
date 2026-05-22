@@ -1,11 +1,12 @@
 import React, { useMemo } from "react";
 
+// ─── SECTION META ────────────────────────────────────────────────────────────
 const SECTION_ICONS = {
   "identitas pegawai": { icon: "🪪", color: "#6366F1" },
   kepegawaian:         { icon: "🏢", color: "#10B981" },
   pangkat:             { icon: "⭐", color: "#F59E0B" },
   keluarga:            { icon: "👨‍👧", color: "#EC4899" },
-  anak:                { icon: "👨‍👧", color: "#EC4899" },
+  anak:                { icon: "👶", color: "#EC4899" },
   pendidikan:          { icon: "🎓", color: "#8B5CF6" },
   ukuran:              { icon: "📏", color: "#06B6D4" },
   alamat:              { icon: "📍", color: "#EF4444" },
@@ -52,7 +53,6 @@ function fuzzyGet(obj, ...keys) {
   return null;
 }
 
-// Parse tabel | Field | Value | → object
 function parseFieldValueTable(tableLines) {
   const nonSep = tableLines.filter(l => !isSeparatorRow(l));
   if (nonSep.length < 1) return {};
@@ -73,7 +73,6 @@ function parseFieldValueTable(tableLines) {
       }
     }
   } else {
-    // multi-kolom: setiap baris jadi entry terpisah tapi gabung ke fields
     for (const row of dataRows) {
       const cols = parseCols(row);
       headers.forEach((h, i) => {
@@ -84,15 +83,14 @@ function parseFieldValueTable(tableLines) {
   return fields;
 }
 
-// ─── PARSER UTAMA ─────────────────────────────────────────────────────────────
+// ─── PARSER ──────────────────────────────────────────────────────────────────
 function parseBlocks(text) {
   const rawLines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const blocks = [];
 
-  // State machine: ### Pegawai → #### SubSection → | tabel |
-  let currentEmployee = null;   // { sections: { sectionTitle: {fields} } }
-  let currentSection  = null;   // string: nama #### heading
-  let currentTable    = [];     // buffer baris tabel
+  let currentEmployee = null;
+  let currentSection  = null;
+  let currentTable    = [];
   let introLines      = [];
 
   const flushTable = () => {
@@ -117,7 +115,6 @@ function parseBlocks(text) {
   };
 
   for (const line of rawLines) {
-    // ### heading → new employee card
     if (/^###\s+/.test(line)) {
       flushEmployee();
       const title = line.replace(/^###\s+/, "").trim();
@@ -125,8 +122,6 @@ function parseBlocks(text) {
       currentSection  = null;
       continue;
     }
-
-    // #### heading → new sub-section dalam card yang sama
     if (/^####\s+/.test(line)) {
       flushTable();
       currentSection = line.replace(/^####\s+/, "").trim();
@@ -135,34 +130,22 @@ function parseBlocks(text) {
       }
       continue;
     }
-
-    // Baris tabel
     if (line.startsWith("|") && line.endsWith("|")) {
       if (!currentEmployee) {
-        // Tabel tanpa ### heading
         currentEmployee = { heading: "Info Pegawai", sections: {} };
         currentSection  = "Info Pegawai";
       }
       currentTable.push(line);
       continue;
     }
-
-    // Baris teks biasa
     flushTable();
-    if (!currentEmployee) {
-      introLines.push(line);
-    }
+    if (!currentEmployee) introLines.push(line);
   }
 
   flushEmployee();
 
-  if (introLines.length > 0) {
-    blocks.unshift({ type: "intro", text: introLines.join(" ") });
-  }
-
-  // Fallback: format lama **field**: value
+  if (introLines.length > 0) blocks.unshift({ type: "intro", text: introLines.join(" ") });
   if (blocks.length === 0) return parseLegacyFormat(rawLines);
-
   return blocks;
 }
 
@@ -197,7 +180,7 @@ function parseLegacyFormat(lines) {
   return blocks;
 }
 
-// ─── EMPLOYEE CARD ─────────────────────────────────────────────────────────────
+// ─── EMPLOYEE CARD ────────────────────────────────────────────────────────────
 function EmployeeCard({ data, isDark }) {
   const allFields = Object.values(data).reduce((acc, s) => ({ ...acc, ...s }), {});
 
@@ -208,46 +191,56 @@ function EmployeeCard({ data, isDark }) {
   const isAktif = status ? status.toLowerCase().includes("aktif") : false;
   const isRingkasan = Object.keys(data).some(k => k.toLowerCase().includes("ringkasan"));
 
-  // Field yang sudah tampil di header → disembunyikan dari body
   const HEADER_FIELDS = new Set(["nama", "nip", "namadenganggelar", "namalengkap"]);
   const isHeaderField = (k) => HEADER_FIELDS.has(k.toLowerCase().replace(/[\s._-]/g, ""));
 
+  // Colors
+  const textPrimary   = isDark ? "#ffffff" : "#0f172a";
+  const textSecondary = isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.45)";
+  const cardBg        = isDark ? "rgba(255,255,255,0.04)" : "#ffffff";
+  const cardBorder    = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
+  const rowDivider    = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
+
   return (
     <div style={{
-      border: `1px solid ${isDark ? "rgba(56,139,255,0.2)" : "rgba(59,130,246,0.15)"}`,
-      borderRadius: 16, overflow: "hidden", marginBottom: 12,
-      background: isDark ? "#0d1117" : "#fff",
-      boxShadow: isDark ? "0 4px 20px rgba(0,0,0,0.4)" : "0 2px 12px rgba(59,130,246,0.08)",
+      borderRadius: 14,
+      overflow: "hidden",
+      marginBottom: 10,
+      background: cardBg,
+      border: `1px solid ${cardBorder}`,
+      boxShadow: isDark
+        ? "0 2px 16px rgba(0,0,0,0.3)"
+        : "0 2px 12px rgba(0,0,0,0.07)",
     }}>
       {/* ── Header ── */}
       <div style={{
         background: isRingkasan
-          ? "linear-gradient(135deg,#1e3a5f,#388BFF)"
-          : "linear-gradient(135deg,#1d4ed8,#3b82f6)",
-        padding: "14px 16px", display: "flex", alignItems: "center", gap: 12,
+          ? "linear-gradient(135deg, #1e3a5f, #388BFF)"
+          : "linear-gradient(135deg, #1d4ed8, #3b82f6)",
+        padding: "16px 18px",
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
       }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: "50%",
-          background: "rgba(255,255,255,0.18)", display: "flex",
-          alignItems: "center", justifyContent: "center",
-          fontSize: 20, flexShrink: 0, border: "2px solid rgba(255,255,255,0.3)",
-        }}>
-          {isRingkasan ? "📊" : "👤"}
-        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           {isRingkasan ? (
-            <div style={{ color: "#fff", fontWeight: 700, fontSize: 15 }}>Ringkasan Data</div>
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: 16 }}>Ringkasan Data</div>
           ) : (
             <>
-              <div style={{ color: "#fff", fontWeight: 700, fontSize: 15, marginBottom: 2 }}>{name}</div>
-              <div style={{ color: "rgba(255,255,255,0.7)", fontSize: 11 }}>NIP: {nip}</div>
+              <div style={{ color: "#fff", fontWeight: 700, fontSize: 17, marginBottom: 3, lineHeight: 1.3 }}>
+                {name}
+              </div>
+              <div style={{ color: "rgba(255,255,255,0.75)", fontSize: 13 }}>NIP: {nip}</div>
               {jabatan && (
                 <div style={{
-                  display: "inline-block", marginTop: 5,
-                  background: "rgba(255,255,255,0.15)", color: "#fff",
-                  fontSize: 10, padding: "2px 10px", borderRadius: 999,
+                  display: "inline-block", marginTop: 6,
+                  background: "rgba(255,255,255,0.18)",
+                  color: "#fff", fontSize: 11,
+                  padding: "2px 10px", borderRadius: 999,
                   border: "1px solid rgba(255,255,255,0.25)",
-                }}>{jabatan}</div>
+                }}>
+                  {jabatan}
+                </div>
               )}
             </>
           )}
@@ -256,15 +249,17 @@ function EmployeeCard({ data, isDark }) {
           <div style={{
             background: isAktif ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)",
             color: isAktif ? "#34D399" : "#F87171",
-            fontSize: 10, fontWeight: 700,
-            padding: "3px 10px", borderRadius: 999, flexShrink: 0,
-            border: `1px solid ${isAktif ? "rgba(52,211,153,0.35)" : "rgba(248,113,113,0.35)"}`,
-          }}>● {status}</div>
+            fontSize: 11, fontWeight: 700,
+            padding: "4px 12px", borderRadius: 999, flexShrink: 0,
+            border: `1px solid ${isAktif ? "rgba(52,211,153,0.4)" : "rgba(248,113,113,0.4)"}`,
+          }}>
+            ● {status}
+          </div>
         )}
       </div>
 
       {/* ── Sections ── */}
-      <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
         {Object.entries(data).map(([secTitle, fields]) => {
           if (!fields || Object.keys(fields).length === 0) return null;
 
@@ -278,46 +273,59 @@ function EmployeeCard({ data, isDark }) {
 
           return (
             <div key={secTitle} style={{
-              border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
-              borderRadius: 10, overflow: "hidden",
+              borderRadius: 10,
+              overflow: "hidden",
+              border: `1px solid ${cardBorder}`,
             }}>
-              {/* Section header */}
+              {/* Section label */}
               <div style={{
-                background: isDark ? `${meta.color}22` : `${meta.color}14`,
-                borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-                padding: "6px 12px", display: "flex", alignItems: "center", gap: 7,
+                padding: "7px 14px",
+                display: "flex", alignItems: "center", gap: 8,
+                background: isDark
+                  ? `${meta.color}18`
+                  : `${meta.color}12`,
+                borderBottom: `1px solid ${rowDivider}`,
               }}>
-                <span style={{ fontSize: 13 }}>{meta.icon}</span>
+                <span style={{ fontSize: 14 }}>{meta.icon}</span>
                 <span style={{
-                  color: meta.color, fontWeight: 700, fontSize: 10,
-                  textTransform: "uppercase", letterSpacing: "0.08em",
+                  color: meta.color,
+                  fontWeight: 700, fontSize: 11,
+                  textTransform: "uppercase", letterSpacing: "0.09em",
                 }}>
                   {secTitle}
                 </span>
               </div>
 
-              {/* Fields grid */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(160px,1fr))" }}>
+              {/* Fields — simple rows */}
+              <div>
                 {Object.entries(displayFields).map(([k, v], fi, arr) => (
                   <div key={k} style={{
-                    padding: "8px 12px",
-                    borderBottom: fi < arr.length - 2
-                      ? `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`
-                      : "none",
-                    borderRight: fi % 2 === 0
-                      ? `1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`
-                      : "none",
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: 12,
+                    padding: "10px 14px",
+                    borderBottom: fi < arr.length - 1 ? `1px solid ${rowDivider}` : "none",
                   }}>
                     <div style={{
-                      fontSize: 9, fontWeight: 700,
-                      color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
-                      textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 3,
-                    }}>{k}</div>
+                      width: 160,
+                      flexShrink: 0,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: textSecondary,
+                      lineHeight: 1.4,
+                    }}>
+                      {k}
+                    </div>
                     <div style={{
-                      fontSize: 12, fontWeight: 500,
-                      color: isDark ? "rgba(255,255,255,0.88)" : "rgba(0,0,0,0.82)",
-                      wordBreak: "break-word", lineHeight: 1.4,
-                    }}>{v || "—"}</div>
+                      flex: 1,
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: textPrimary,
+                      wordBreak: "break-word",
+                      lineHeight: 1.4,
+                    }}>
+                      {v || "—"}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -330,25 +338,27 @@ function EmployeeCard({ data, isDark }) {
 }
 
 // ─── MAIN EXPORT ──────────────────────────────────────────────────────────────
-export default function MessageRenderer({ text, isDark, isStreaming = false }) {
+export default function MessageRenderer({ text, isDark }) {
   const blocks = useMemo(() => {
-    if (isStreaming) return null;
     if (!text) return null;
-
-    // ✅ Hanya parse sebagai card jika ada ### heading
-    // Teks biasa (jawaban "siapa", "apa", dll) tidak punya ###
     if (!text.includes("###")) return null;
-
     try { return parseBlocks(text); } catch { return null; }
-  }, [text, isStreaming]);
+  }, [text]);
+
+  const textPrimary = isDark ? "#ffffff" : "#0f172a";
 
   if (!blocks || blocks.length === 0) {
     return (
       <p style={{
-        margin: 0, lineHeight: 1.7, fontSize: 14,
-        whiteSpace: "pre-wrap", wordBreak: "break-word"
+        margin: 0,
+        lineHeight: 1.75,
+        fontSize: 15,
+        fontWeight: 500,
+        color: textPrimary,
+        whiteSpace: "pre-wrap",
+        wordBreak: "break-word",
       }}>
-        {isStreaming ? text : renderInline(text)}
+        {renderInline(text)}
       </p>
     );
   }
@@ -359,8 +369,11 @@ export default function MessageRenderer({ text, isDark, isStreaming = false }) {
         if (block.type === "intro") {
           return (
             <p key={i} style={{
-              margin: "0 0 4px", lineHeight: 1.7, fontSize: 14,
-              color: isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.75)"
+              margin: "0 0 6px",
+              lineHeight: 1.75,
+              fontSize: 15,
+              fontWeight: 500,
+              color: textPrimary,
             }}>
               {renderInline(block.text)}
             </p>

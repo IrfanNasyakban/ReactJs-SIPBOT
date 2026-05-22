@@ -6,7 +6,6 @@ import { LoginUser, reset } from "../features/authSlice";
 import { HiEye, HiEyeOff, HiUser, HiLockClosed } from "react-icons/hi";
 
 import mascotImg from "../assets/mascot.png";
-import imigrasiImg from "../assets/logo_imigrasi.png";
 import pemasyarakatanImg from "../assets/logo_pemasyarakatan.png";
 
 const LoginPage = () => {
@@ -80,56 +79,25 @@ const LoginPage = () => {
       {/* ── Main layout ── */}
       <div className="relative z-10 w-full max-w-4xl grid lg:grid-cols-2 items-center gap-14">
 
-        {/* LEFT: Logos */}
+        {/* LEFT: Logo */}
         <div className="hidden lg:flex flex-col items-center gap-8">
 
-          {/* Logo pair */}
-          <div className="flex items-center gap-6">
-            {/* Logo Imigrasi */}
-            <div className="flex flex-col items-center gap-3 animate-[float1_6s_ease-in-out_infinite]">
-              <div
-                className="w-32 h-32 rounded-full flex items-center justify-center relative"
-                style={{
-                  background: "rgba(255,255,255,.04)",
-                  border: "1.5px solid rgba(56,139,255,.3)",
-                  backdropFilter: "blur(6px)",
-                }}
-              >
-                <img
-                  src={imigrasiImg}
-                  alt="Logo Imigrasi"
-                  className="w-24 h-24 object-contain select-none"
-                  draggable={false}
-                />
-              </div>
-            </div>
-
-            {/* Divider */}
+          {/* Logo tunggal pemasyarakatan */}
+          <div className="flex flex-col items-center gap-5 animate-[float1_6s_ease-in-out_infinite]">
             <div
-              className="w-px h-16"
+              className="w-48 h-48 rounded-full flex items-center justify-center relative"
               style={{
-                background:
-                  "linear-gradient(to bottom, transparent, rgba(56,139,255,.4), transparent)",
+                background: "rgba(255,255,255,.04)",
+                border: "1.5px solid rgba(56,139,255,.3)",
+                backdropFilter: "blur(6px)",
               }}
-            />
-
-            {/* Logo Pemasyarakatan */}
-            <div className="flex flex-col items-center gap-3 animate-[float2_7s_ease-in-out_infinite]">
-              <div
-                className="w-32 h-32 rounded-full flex items-center justify-center relative"
-                style={{
-                  background: "rgba(255,255,255,.04)",
-                  border: "1.5px solid rgba(56,139,255,.3)",
-                  backdropFilter: "blur(6px)",
-                }}
-              >
-                <img
-                  src={pemasyarakatanImg}
-                  alt="Logo Pemasyarakatan"
-                  className="w-24 h-24 object-contain select-none"
-                  draggable={false}
-                />
-              </div>
+            >
+              <img
+                src={pemasyarakatanImg}
+                alt="Logo Pemasyarakatan"
+                className="w-40 h-40 object-contain select-none"
+                draggable={false}
+              />
             </div>
           </div>
 

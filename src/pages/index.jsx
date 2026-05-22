@@ -46,5 +46,5 @@ export { default as AddRekeningNext } from './AddContinuePage/AddRekeningNext';
 export { default as AddPendidikanNext } from './AddContinuePage/AddPendidikanNext';
 export { default as AddFisikNext } from './AddContinuePage/AddFisikNext';
 export { default as AddUkuranNext } from './AddContinuePage/AddUkuranNext';
-export { default as AddPasanganNext } from './AddContinuePage/AddPasanganNext';
+export { default as AddKeluargaNext } from './AddContinuePage/AddKeluargaNext';
 export { default as AddAnakNext } from './AddContinuePage/AddAnakNext';

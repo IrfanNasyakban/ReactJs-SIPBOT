@@ -3,7 +3,13 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { getMe } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
-import { HiEye, HiPencil, HiTrash, HiPlus, HiSearch } from "react-icons/hi";
+import {
+  HiDownload,
+  HiPencil,
+  HiTrash,
+  HiPlus,
+  HiSearch,
+} from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
 
 const ITEMS_PER_PAGE = 10;
@@ -86,6 +92,45 @@ const ListPangkat = () => {
       // Tetap tutup modal meskipun error
       setConfirmDelete(null);
     }
+  };
+
+  const exportCSV = () => {
+    const columns = [
+      { key: "nama", label: "Nama" },
+      { key: "pangkat", label: "Pangkat" },
+      { key: "golonganRuang", label: "Golongan Ruang" },
+      { key: "tanggalSKPangkat", label: "Tanggal SK Pangkat" },
+      { key: "nomorSKPangkat", label: "Nomor SK Pangkat" },
+      { key: "SKPangkatDari", label: "SK Pangkat Dari" },
+      { key: "uraianSKPangkat", label: "Uraian SK Pangkat" },
+      { key: "tmtPangkat", label: "TMT Pangkat" },
+    ];
+
+    const headers = ["No", ...columns.map((c) => c.label)];
+
+    const rows = pangkat.map((p, i) => [
+      i + 1,
+      ...columns.map((c) => {
+        let val;
+        if (c.key === "nama") {
+          val = p.pegawai?.namaDenganGelar || "-";
+        } else if (c.key === "tanggalSKPangkat" || c.key === "tmtPangkat") {
+          val = p[c.key] ? new Date(p[c.key]).toLocaleDateString("id-ID") : "-";
+        } else {
+          val = p[c.key] ?? "-";
+        }
+        return `"${String(val).replace(/"/g, '""')}"`;
+      }),
+    ]);
+
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "data_pangkat.csv";
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -196,6 +241,22 @@ const ListPangkat = () => {
                 }}
               />
             </div>
+
+            <button
+              onClick={exportCSV}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-88 hover:-translate-y-0.5"
+              style={{
+                background: isDark
+                  ? "rgba(16,185,129,.12)"
+                  : "rgba(16,185,129,.1)",
+                color: "#10B981",
+                border: "1px solid rgba(16,185,129,.25)",
+              }}
+            >
+              <HiDownload className="w-4 h-4" />
+              Export CSV
+            </button>
+
             {/* Add Button */}
             <button
               onClick={() => navigate("/add-pangkat")}
@@ -415,9 +476,7 @@ const ListPangkat = () => {
                           <div className="flex items-center justify-center gap-1.5">
                             {/* Edit */}
                             <button
-                              onClick={() =>
-                                navigate(`/pangkat/edit/${p.id}`)
-                              }
+                              onClick={() => navigate(`/pangkat/edit/${p.id}`)}
                               title="Edit"
                               className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-150 hover:-translate-y-0.5"
                               style={{

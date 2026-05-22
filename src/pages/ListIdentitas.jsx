@@ -3,7 +3,13 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { getMe } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
-import { HiEye, HiPencil, HiTrash, HiPlus, HiSearch } from "react-icons/hi";
+import {
+  HiDownload,
+  HiPencil,
+  HiTrash,
+  HiPlus,
+  HiSearch,
+} from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
 
 const ITEMS_PER_PAGE = 10;
@@ -91,6 +97,38 @@ const ListIdentitas = () => {
   const formatNomor = (nomor) => {
     // Format nomor dengan spasi setiap 4 digit
     return nomor.replace(/(\d{4})(?=\d)/g, "$1 ");
+  };
+
+  const exportCSV = () => {
+    const columns = [
+      { key: "nama", label: "Nama" },
+      { key: "nik", label: "NIK" },
+      { key: "nomorKK", label: "Nomor KK" },
+      { key: "nomorBPJS", label: "Nomor BPJS" },
+      { key: "nomorTaspen", label: "Nomor TASPEN" },
+    ];
+
+    const headers = ["No", ...columns.map((c) => c.label)];
+
+    const rows = identitas.map((id, i) => [
+      i + 1,
+      ...columns.map((c) => {
+        const val =
+          c.key === "nama"
+            ? id.pegawai?.namaDenganGelar || "-"
+            : (id[c.key] ?? "-");
+        return `"${String(val).replace(/"/g, '""')}"`;
+      }),
+    ]);
+
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "data_identitas.csv";
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -201,6 +239,22 @@ const ListIdentitas = () => {
                 }}
               />
             </div>
+
+            <button
+              onClick={exportCSV}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-88 hover:-translate-y-0.5"
+              style={{
+                background: isDark
+                  ? "rgba(16,185,129,.12)"
+                  : "rgba(16,185,129,.1)",
+                color: "#10B981",
+                border: "1px solid rgba(16,185,129,.25)",
+              }}
+            >
+              <HiDownload className="w-4 h-4" />
+              Export CSV
+            </button>
+
             {/* Add Button */}
             <button
               onClick={() => navigate("/add-identitas")}

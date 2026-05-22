@@ -3,7 +3,13 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { getMe } from "../features/authSlice";
 import { useNavigate } from "react-router-dom";
-import { HiPencil, HiTrash, HiPlus, HiSearch } from "react-icons/hi";
+import {
+  HiPencil,
+  HiTrash,
+  HiPlus,
+  HiSearch,
+  HiDownload,
+} from "react-icons/hi";
 import { useStateContext } from "../contexts/ContextProvider";
 
 const ITEMS_PER_PAGE = 10;
@@ -115,6 +121,50 @@ const ListKepegawaian = () => {
     }
   };
 
+  const exportCSV = () => {
+    const columns = [
+      { key: "namaDenganGelar", label: "Nama" },
+      { key: "statusKepegawaian", label: "Status" },
+      { key: "jabatan", label: "Jabatan" },
+      { key: "bagianKerja", label: "Bagian Kerja" },
+      { key: "eselon", label: "Eselon" },
+      { key: "angkatanPejim", label: "Angkatan PEJIM" },
+      { key: "ppns", label: "PPNS" },
+      { key: "tmtPensiun", label: "TMT Pensiun" },
+    ];
+
+    const headers = ["No", ...columns.map((c) => c.label)];
+
+    const rows = kepegawaian.map((k, i) => [
+      i + 1,
+      ...columns.map((c) => {
+        let val;
+        if (c.key === "namaDenganGelar") {
+          val = k.pegawai?.namaDenganGelar || k.nama || "-";
+        } else if (c.key === "ppns") {
+          val = k.ppns === "Ya" || k.ppns === "1" ? "Ya" : "Tidak";
+        } else if (c.key === "tmtPensiun") {
+          val =
+            k.tmtPensiun && k.tmtPensiun !== "-"
+              ? new Date(k.tmtPensiun).toLocaleDateString("id-ID")
+              : "-";
+        } else {
+          val = k[c.key] ?? "-";
+        }
+        return `"${String(val).replace(/"/g, '""')}"`;
+      }),
+    ]);
+
+    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "data_kepegawaian.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div
       className={`min-h-screen overflow-hidden font-sans ${
@@ -223,6 +273,20 @@ const ListKepegawaian = () => {
                 }}
               />
             </div>
+            <button
+              onClick={exportCSV}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-88 hover:-translate-y-0.5"
+              style={{
+                background: isDark
+                  ? "rgba(16,185,129,.12)"
+                  : "rgba(16,185,129,.1)",
+                color: "#10B981",
+                border: "1px solid rgba(16,185,129,.25)",
+              }}
+            >
+              <HiDownload className="w-4 h-4" />
+              Export CSV
+            </button>
             {/* Add Button */}
             <button
               onClick={() => navigate("/add-kepegawaian")}

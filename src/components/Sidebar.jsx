@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useSelector } from "react-redux";
 import { Link, NavLink } from 'react-router-dom'
 import { MdOutlineCancel, MdKeyboardArrowDown } from 'react-icons/md'
-import { FaUser, FaProjectDiagram, FaTools, FaCertificate, FaBriefcase, FaGraduationCap, FaUsers, FaHeart, FaChild, FaLock } from 'react-icons/fa';
+import { FaUser, FaProjectDiagram, FaTools, FaCcVisa, FaMapMarker, FaSortNumericUp, FaBriefcase, FaGraduationCap, FaUsers, FaHeart, FaChild, FaLock } from 'react-icons/fa';
 import { BiSolidDashboard } from 'react-icons/bi';
 
 import { useStateContext } from '../contexts/ContextProvider'
@@ -57,7 +57,7 @@ const Sidebar = () => {
         {
           name: 'alamat',
           displayName: 'Alamat',
-          icon: <FaCertificate />,
+          icon: <FaMapMarker />,
           allowedRoles: ['admin']
         },
         {
@@ -69,13 +69,13 @@ const Sidebar = () => {
         {
           name: 'rekening',
           displayName: 'Rekening',
-          icon: <FaGraduationCap />,
+          icon: <FaCcVisa />,
           allowedRoles: ['admin']
         },
         {
           name: 'pendidikan',
           displayName: 'Pendidikan',
-          icon: <FaUsers />,
+          icon: <FaGraduationCap />,
           allowedRoles: ['admin']
         },
         {
@@ -87,7 +87,7 @@ const Sidebar = () => {
         {
           name: 'ukuran',
           displayName: 'Ukuran Dinas',
-          icon: <FaUsers />,
+          icon: <FaSortNumericUp />,
           allowedRoles: ['admin']
         },
         {

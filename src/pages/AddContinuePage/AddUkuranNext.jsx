@@ -5,8 +5,121 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { getMe } from "../../features/authSlice";
 import { useStateContext } from "../../contexts/ContextProvider";
 import { BsFillTelephoneFill, BsPersonFill } from "react-icons/bs";
-import { HiArrowLeft } from "react-icons/hi";
+import { HiArrowLeft, HiCheck } from "react-icons/hi";
 
+// ── Step Trail Data ──────────────────────────────────────────────────────────
+const STEPS = [
+  { id: 1,  label: "Data Pegawai",     status: "done"    },
+  { id: 2,  label: "Data Kepegawaian", status: "done"    },
+  { id: 3,  label: "Data Pangkat",     status: "done"    },
+  { id: 4,  label: "Data Alamat",      status: "done"    },
+  { id: 5,  label: "Data Identitas",   status: "done"    },
+  { id: 6,  label: "Data Rekening",    status: "done"    },
+  { id: 7,  label: "Data Pendidikan",  status: "done"    },
+  { id: 8,  label: "Data Fisik",       status: "done"    },
+  { id: 9,  label: "Data Ukuran",      status: "current" },
+  { id: 10, label: "Data Keluarga",    status: "pending" },
+];
+
+const CURRENT_STEP = 9;
+
+// ── StepTrail Component ──────────────────────────────────────────────────────
+const StepTrail = ({ currentColor, isDark }) => {
+  const rgb = (hex) => `${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)}`;
+  const c = rgb(currentColor);
+
+  return (
+    <div
+      className="w-full rounded-2xl mb-8 overflow-hidden"
+      style={{
+        background: isDark ? "rgba(255,255,255,.03)" : "rgba(255,255,255,.95)",
+        border: `1px solid ${isDark ? "rgba(56,139,255,.15)" : "rgba(0,0,0,.07)"}`,
+        backdropFilter: "blur(16px)",
+        boxShadow: isDark ? "0 4px 24px rgba(0,0,0,.3)" : "0 4px 24px rgba(0,0,0,.06)",
+      }}
+    >
+      <div className="h-1 w-full" style={{ background: isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.04)" }}>
+        <div
+          className="h-full transition-all duration-700 ease-out"
+          style={{
+            width: `${(CURRENT_STEP / STEPS.length) * 100}%`,
+            background: `linear-gradient(90deg, ${currentColor}, rgba(${c},.6))`,
+            borderRadius: "0 4px 4px 0",
+          }}
+        />
+      </div>
+
+      <div className="px-6 py-5">
+        <div className="flex items-start gap-0 overflow-x-auto pb-1">
+          {STEPS.map((step, index) => {
+            const isDone    = step.status === "done";
+            const isCurrent = step.status === "current";
+            const isLast    = index === STEPS.length - 1;
+
+            return (
+              <React.Fragment key={step.id}>
+                <div className="flex flex-col items-center flex-shrink-0" style={{ minWidth: 72 }}>
+                  <div
+                    className="relative flex items-center justify-center rounded-full transition-all duration-300"
+                    style={{
+                      width: 36, height: 36,
+                      background: isDone ? currentColor : isCurrent ? isDark ? `rgba(${c},.18)` : `rgba(${c},.12)` : isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.04)",
+                      border: isDone || isCurrent ? `2px solid ${currentColor}` : `2px solid ${isDark ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.1)"}`,
+                      boxShadow: isCurrent ? `0 0 0 4px rgba(${c},.15), 0 4px 12px rgba(${c},.25)` : isDone ? `0 2px 8px rgba(${c},.35)` : "none",
+                    }}
+                  >
+                    {isDone ? (
+                      <HiCheck className="w-4 h-4 text-white font-bold" />
+                    ) : (
+                      <span className="text-xs font-bold" style={{ color: isCurrent ? currentColor : isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.3)" }}>
+                        {step.id}
+                      </span>
+                    )}
+                    {isCurrent && (
+                      <span className="absolute inset-0 rounded-full animate-ping" style={{ background: `rgba(${c},.25)`, animationDuration: "2s" }} />
+                    )}
+                  </div>
+                  <span
+                    className="text-center mt-2 leading-tight transition-colors duration-200"
+                    style={{
+                      fontSize: 10.5, maxWidth: 68,
+                      color: isDone || isCurrent ? currentColor : isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.35)",
+                      fontWeight: isCurrent ? 700 : isDone ? 600 : 400,
+                    }}
+                  >
+                    {step.label}
+                  </span>
+                </div>
+
+                {!isLast && (
+                  <div className="flex-1 relative mt-[18px] mx-1" style={{ minWidth: 16 }}>
+                    <div className="h-0.5 w-full rounded-full" style={{ background: isDone ? currentColor : isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.08)", opacity: isDone ? 0.7 : 1 }} />
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center justify-between mt-4 pt-3" style={{ borderTop: `1px solid ${isDark ? "rgba(255,255,255,.06)" : "rgba(0,0,0,.05)"}` }}>
+          <p className="text-xs" style={{ color: isDark ? "rgba(255,255,255,.3)" : "rgba(0,0,0,.4)" }}>
+            Langkah <span className="font-semibold" style={{ color: currentColor }}>{CURRENT_STEP}</span> dari <span className="font-semibold" style={{ color: isDark ? "rgba(255,255,255,.5)" : "rgba(0,0,0,.6)" }}>{STEPS.length}</span>
+          </p>
+          <div className="flex items-center gap-2">
+            {[{ color: currentColor, label: "Selesai / Aktif" }, { color: isDark ? "rgba(255,255,255,.2)" : "rgba(0,0,0,.15)", label: "Belum" }].map((item, i) => (
+              <div key={i} className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full" style={{ background: item.color }} />
+                <span className="text-xs" style={{ color: isDark ? "rgba(255,255,255,.25)" : "rgba(0,0,0,.35)" }}>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Main Component ───────────────────────────────────────────────────────────
 const AddUkuranNext = () => {
   const [ukuranPadDivamot, setUkuranPadDivamot] = useState("");
   const [ukuranSepatu, setUkuranSepatu] = useState("");
@@ -30,9 +143,7 @@ const AddUkuranNext = () => {
     }
   }, [location.state]);
 
-  useEffect(() => {
-    dispatch(getMe());
-  }, [dispatch]);
+  useEffect(() => { dispatch(getMe()); }, [dispatch]);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -47,131 +158,98 @@ const AddUkuranNext = () => {
     e.preventDefault();
     setLoading(true);
 
-    const jsonData = {
-      idPegawai,
-      ukuranPadDivamot,
-      ukuranSepatu,
-      ukuranTopi,
-    };
+    const jsonData = { idPegawai, ukuranPadDivamot, ukuranSepatu, ukuranTopi };
 
     try {
       const token = localStorage.getItem("accessToken");
-      const response = await axios.post(
-        "http://localhost:5000/ukuran",
-        jsonData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
+      const response = await axios.post("http://localhost:5000/ukuran", jsonData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
-      );
+      });
       console.log("Response dari Server:", response);
       setLoading(false);
       navigate("/next/add/pasangan", {
-        state: {
-          idPegawai: idPegawai,
-          namaPegawai: namaPegawai,
-        },
+        state: { idPegawai, namaPegawai },
       });
     } catch (error) {
       setLoading(false);
-      console.error(
-        "Error:",
-        error.response ? error.response.data : error.message,
-      );
-      alert(
-        "Terjadi kesalahan: " +
-          (error.response?.data?.message || error.message),
-      );
+      console.error("Error:", error.response ? error.response.data : error.message);
+      alert("Terjadi kesalahan: " + (error.response?.data?.message || error.message));
     }
   };
 
+  const rgb = (hex) => `${parseInt(hex.slice(1,3),16)},${parseInt(hex.slice(3,5),16)},${parseInt(hex.slice(5,7),16)}`;
+
+  const selectBase = {
+    background: isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)",
+    border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
+    color: isDark ? "white" : "black",
+  };
+
+  const onFocus = (e) => {
+    e.target.style.borderColor = currentColor;
+    e.target.style.background = isDark ? `rgba(${rgb(currentColor)},.08)` : `rgba(${rgb(currentColor)},.05)`;
+  };
+
+  const onBlur = (e) => {
+    e.target.style.borderColor = isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)";
+    e.target.style.background = isDark ? "rgba(255,255,255,.05)" : "rgba(0,0,0,.03)";
+  };
+
+  const sectionBorder = {
+    borderColor: isDark ? "rgba(56,139,255,.2)" : `rgba(${rgb(currentColor)},.2)`,
+  };
+
+  const labelStyle = {
+    color: isDark ? "rgba(255,255,255,.8)" : "rgba(0,0,0,.7)",
+  };
+
   return (
-    <div
-      className={`min-h-screen overflow-hidden font-sans transition-colors duration-300 ${
-        isDark ? "bg-[#040c24]" : "bg-gray-50"
-      }`}
-    >
-      {/* ── Background Grid ── */}
+    <div className={`min-h-screen overflow-hidden font-sans transition-colors duration-300 ${isDark ? "bg-[#040c24]" : "bg-gray-50"}`}>
+      {/* Background Grid */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
         style={{
           backgroundImage: `
-                            linear-gradient(${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px),
-                            linear-gradient(90deg, ${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px)
-                          `,
+            linear-gradient(${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px),
+            linear-gradient(90deg, ${isDark ? "rgba(56,139,255,.06)" : "rgba(148,163,184,.06)"} 0.4px, transparent 0.5px)
+          `,
           backgroundSize: "48px 48px",
         }}
       />
 
-      {/* ── Floating Orbs ── */}
-      <div
-        className="fixed rounded-full pointer-events-none z-0"
-        style={{
-          width: 380,
-          height: 380,
-          filter: "blur(80px)",
-          background: isDark
-            ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.28)`
-            : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.15)`,
-          top: -100,
-          left: -80,
-        }}
-      />
-      <div
-        className="fixed rounded-full pointer-events-none z-0"
-        style={{
-          width: 340,
-          height: 340,
-          filter: "blur(80px)",
-          background: isDark
-            ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.32)`
-            : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.18)`,
-          bottom: -80,
-          right: -60,
-        }}
-      />
+      {/* Floating Orbs */}
+      <div className="fixed rounded-full pointer-events-none z-0" style={{ width: 380, height: 380, filter: "blur(80px)", background: isDark ? `rgba(${rgb(currentColor)},.28)` : `rgba(${rgb(currentColor)},.15)`, top: -100, left: -80 }} />
+      <div className="fixed rounded-full pointer-events-none z-0" style={{ width: 340, height: 340, filter: "blur(80px)", background: isDark ? `rgba(${rgb(currentColor)},.32)` : `rgba(${rgb(currentColor)},.18)`, bottom: -80, right: -60 }} />
 
-      {/* ── Content ── */}
+      {/* Content */}
       <div className="relative z-10 p-7">
+
         {/* Header */}
-        <div className="flex items-start justify-between flex-wrap gap-4 mb-8">
+        <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <button
                 onClick={() => navigate("/ukuran")}
                 className="p-2 rounded-lg transition-all duration-200 hover:scale-110"
-                style={{
-                  background: isDark
-                    ? "rgba(255,255,255,.08)"
-                    : "rgba(0,0,0,.05)",
-                }}
+                style={{ background: isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.05)" }}
               >
-                <HiArrowLeft
-                  className="w-5 h-5"
-                  style={{ color: currentColor }}
-                />
+                <HiArrowLeft className="w-5 h-5" style={{ color: currentColor }} />
               </button>
-              <h1
-                className={`text-2xl font-bold tracking-wide ${
-                  isDark ? "text-white" : "text-gray-900"
-                }`}
-              >
+              <h1 className={`text-2xl font-bold tracking-wide ${isDark ? "text-white" : "text-gray-900"}`}>
                 Tambah Data <span style={{ color: currentColor }}>Ukuran</span>
               </h1>
             </div>
-            <p
-              className="text-xs ml-11 mt-1"
-              style={{
-                color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)",
-              }}
-            >
-              Formulir Penambahan Data Ukuran Pegawai - Kantor Imigrasi Kelas II
-              TPI Lhokseumawe
+            <p className="text-xs ml-11 mt-1" style={{ color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)" }}>
+              Formulir Penambahan Data Ukuran Pegawai - Kantor Imigrasi Kelas II TPI Lhokseumawe
             </p>
           </div>
         </div>
+
+        {/* Step Trail */}
+        <StepTrail currentColor={currentColor} isDark={isDark} />
 
         {/* Form Card */}
         <form onSubmit={saveUkuran}>
@@ -183,332 +261,111 @@ const AddUkuranNext = () => {
               backdropFilter: "blur(16px)",
             }}
           >
-            {/* Top Highlight */}
-            <div
-              className="h-px pointer-events-none"
-              style={{
-                background: isDark
-                  ? "linear-gradient(90deg,transparent,rgba(56,139,255,.5),transparent)"
-                  : `linear-gradient(90deg,transparent,${currentColor}80,transparent)`,
-              }}
-            />
+            <div className="h-px pointer-events-none" style={{ background: isDark ? "linear-gradient(90deg,transparent,rgba(56,139,255,.5),transparent)" : `linear-gradient(90deg,transparent,${currentColor}80,transparent)` }} />
 
             <div className="p-8">
-              {/* ── Section 0: Data Pegawai ── */}
+
+              {/* Section 0: Data Pegawai */}
               <div className="mb-8">
-                <div
-                  className="pb-4 border-b"
-                  style={{
-                    borderColor: isDark
-                      ? "rgba(56,139,255,.2)"
-                      : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.2)`,
-                  }}
-                >
-                  <h2
-                    className="text-lg font-bold flex items-center gap-2"
-                    style={{ color: currentColor }}
-                  >
+                <div className="pb-4 border-b" style={sectionBorder}>
+                  <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: currentColor }}>
                     <BsPersonFill className="w-8 h-8 dark:text-white" />
                     Data Pegawai
                   </h2>
-                  <p
-                    className="text-xs mt-1"
-                    style={{
-                      color: isDark
-                        ? "rgba(255,255,255,.35)"
-                        : "rgba(0,0,0,.5)",
-                    }}
-                  >
+                  <p className="text-xs mt-1" style={{ color: isDark ? "rgba(255,255,255,.35)" : "rgba(0,0,0,.5)" }}>
                     Informasi pegawai yang baru ditambahkan
                   </p>
                 </div>
-
                 <div className="grid grid-cols-2 gap-6 mt-6">
-                  {/* ID Pegawai (Hidden) */}
                   <input type="hidden" value={idPegawai} />
-
-                  {/* Nama Pegawai (Read Only) */}
                   <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
+                    <label className="block text-sm font-semibold mb-2" style={labelStyle}>
                       Nama Pegawai <span style={{ color: "#ef4444" }}>*</span>
                     </label>
-                    <p className="dark:text-white text-xl font-bold">
-                      {namaPegawai}
-                    </p>
+                    <p className="dark:text-white text-xl font-bold">{namaPegawai}</p>
                   </div>
                 </div>
               </div>
 
-              {/* ── Section 1: Ukuran Seragam & Perlengkapan Dinas ── */}
+              {/* Section 1: Ukuran Seragam & Perlengkapan Dinas */}
               <div className="mb-8">
-                <div
-                  className="pb-4 border-b"
-                  style={{
-                    borderColor: isDark
-                      ? "rgba(56,139,255,.2)"
-                      : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.2)`,
-                  }}
-                >
-                  <h2
-                    className="text-lg font-bold flex items-center gap-2"
-                    style={{ color: currentColor }}
-                  >
+                <div className="pb-4 border-b" style={sectionBorder}>
+                  <h2 className="text-lg font-bold flex items-center gap-2" style={{ color: currentColor }}>
                     <span className="text-xl">📏</span>
                     Ukuran Seragam & Perlengkapan Dinas
                   </h2>
                 </div>
-
                 <div className="grid grid-cols-3 gap-6 mt-6">
-                  {/* Ukuran PDH/PDL (Pakaian Dinas) */}
+
+                  {/* Ukuran PDH/PDL */}
                   <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
-                      Ukuran PDH/PDL (Pakaian Dinas){" "}
-                      <span style={{ color: "#ef4444" }}>*</span>
+                    <label className="block text-sm font-semibold mb-2" style={labelStyle}>
+                      Ukuran PDH/PDL (Pakaian Dinas) <span style={{ color: "#ef4444" }}>*</span>
                     </label>
                     <select
-                      name="ukuranPadDivamot"
-                      required
+                      name="ukuranPadDivamot" required
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={ukuranPadDivamot}
+                      style={selectBase} value={ukuranPadDivamot}
                       onChange={(e) => setUkuranPadDivamot(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
+                      onFocus={onFocus} onBlur={onBlur}
                     >
                       <option value="">-- Pilih Ukuran --</option>
-                      <option value="XS" style={{ color: "black" }}>
-                        XS
-                      </option>
-                      <option value="S" style={{ color: "black" }}>
-                        S
-                      </option>
-                      <option value="M" style={{ color: "black" }}>
-                        M
-                      </option>
-                      <option value="L" style={{ color: "black" }}>
-                        L
-                      </option>
-                      <option value="XL" style={{ color: "black" }}>
-                        XL
-                      </option>
-                      <option value="XXL" style={{ color: "black" }}>
-                        XXL
-                      </option>
-                      <option value="XXXL" style={{ color: "black" }}>
-                        XXXL
-                      </option>
-                      <option value="XXXXL" style={{ color: "black" }}>
-                        XXXXL
-                      </option>
+                      {["XS","S","M","L","XL","XXL","XXXL","XXXXL"].map((v) => (
+                        <option key={v} value={v} style={{ color: "black" }}>{v}</option>
+                      ))}
                     </select>
                   </div>
 
                   {/* Ukuran Sepatu */}
                   <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
+                    <label className="block text-sm font-semibold mb-2" style={labelStyle}>
                       Ukuran Sepatu <span style={{ color: "#ef4444" }}>*</span>
                     </label>
                     <select
-                      name="ukuranSepatu"
-                      required
+                      name="ukuranSepatu" required
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={ukuranSepatu}
+                      style={selectBase} value={ukuranSepatu}
                       onChange={(e) => setUkuranSepatu(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
+                      onFocus={onFocus} onBlur={onBlur}
                     >
                       <option value="">-- Pilih Ukuran --</option>
-                      <option value="36" style={{ color: "black" }}>
-                        36
-                      </option>
-                      <option value="37" style={{ color: "black" }}>
-                        37
-                      </option>
-                      <option value="38" style={{ color: "black" }}>
-                        38
-                      </option>
-                      <option value="39" style={{ color: "black" }}>
-                        39
-                      </option>
-                      <option value="40" style={{ color: "black" }}>
-                        40
-                      </option>
-                      <option value="41" style={{ color: "black" }}>
-                        41
-                      </option>
-                      <option value="42" style={{ color: "black" }}>
-                        42
-                      </option>
-                      <option value="43" style={{ color: "black" }}>
-                        43
-                      </option>
-                      <option value="44" style={{ color: "black" }}>
-                        44
-                      </option>
-                      <option value="45" style={{ color: "black" }}>
-                        45
-                      </option>
-                      <option value="46" style={{ color: "black" }}>
-                        46
-                      </option>
+                      {Array.from({ length: 11 }, (_, i) => 36 + i).map((v) => (
+                        <option key={v} value={String(v)} style={{ color: "black" }}>{v}</option>
+                      ))}
                     </select>
                   </div>
 
                   {/* Ukuran Topi */}
                   <div>
-                    <label
-                      className="block text-sm font-semibold mb-2"
-                      style={{
-                        color: isDark
-                          ? "rgba(255,255,255,.8)"
-                          : "rgba(0,0,0,.7)",
-                      }}
-                    >
+                    <label className="block text-sm font-semibold mb-2" style={labelStyle}>
                       Ukuran Topi <span style={{ color: "#ef4444" }}>*</span>
                     </label>
                     <select
-                      name="ukuranTopi"
-                      required
+                      name="ukuranTopi" required
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
-                      style={{
-                        background: isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)",
-                        border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
-                        color: isDark ? "white" : "black",
-                      }}
-                      value={ukuranTopi}
+                      style={selectBase} value={ukuranTopi}
                       onChange={(e) => setUkuranTopi(e.target.value)}
-                      onFocus={(e) => {
-                        e.target.style.borderColor = currentColor;
-                        e.target.style.background = isDark
-                          ? `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.08)`
-                          : `rgba(${parseInt(currentColor.slice(1, 3), 16)},${parseInt(currentColor.slice(3, 5), 16)},${parseInt(currentColor.slice(5, 7), 16)},.05)`;
-                      }}
-                      onBlur={(e) => {
-                        e.target.style.borderColor = isDark
-                          ? "rgba(255,255,255,.1)"
-                          : "rgba(0,0,0,.1)";
-                        e.target.style.background = isDark
-                          ? "rgba(255,255,255,.05)"
-                          : "rgba(0,0,0,.03)";
-                      }}
+                      onFocus={onFocus} onBlur={onBlur}
                     >
                       <option value="">-- Pilih Ukuran --</option>
-                      <option value="52" style={{ color: "black" }}>
-                        52
-                      </option>
-                      <option value="53" style={{ color: "black" }}>
-                        53
-                      </option>
-                      <option value="54" style={{ color: "black" }}>
-                        54
-                      </option>
-                      <option value="55" style={{ color: "black" }}>
-                        55
-                      </option>
-                      <option value="56" style={{ color: "black" }}>
-                        56
-                      </option>
-                      <option value="57" style={{ color: "black" }}>
-                        57
-                      </option>
-                      <option value="58" style={{ color: "black" }}>
-                        58
-                      </option>
-                      <option value="59" style={{ color: "black" }}>
-                        59
-                      </option>
-                      <option value="60" style={{ color: "black" }}>
-                        60
-                      </option>
-                      <option value="61" style={{ color: "black" }}>
-                        61
-                      </option>
-                      <option value="62" style={{ color: "black" }}>
-                        62
-                      </option>
+                      {Array.from({ length: 11 }, (_, i) => 52 + i).map((v) => (
+                        <option key={v} value={String(v)} style={{ color: "black" }}>{v}</option>
+                      ))}
                     </select>
                   </div>
+
                 </div>
               </div>
+
             </div>
 
-            {/* Bottom Highlight */}
-            <div
-              className="h-px pointer-events-none"
-              style={{
-                background: isDark
-                  ? "linear-gradient(90deg,transparent,rgba(56,139,255,.3),transparent)"
-                  : `linear-gradient(90deg,transparent,${currentColor}60,transparent)`,
-              }}
-            />
+            <div className="h-px pointer-events-none" style={{ background: isDark ? "linear-gradient(90deg,transparent,rgba(56,139,255,.3),transparent)" : `linear-gradient(90deg,transparent,${currentColor}60,transparent)` }} />
 
             {/* Footer Actions */}
             <div
               className="px-8 py-6 flex items-center justify-center gap-4"
               style={{
-                background: isDark
-                  ? "rgba(255,255,255,.01)"
-                  : "rgba(0,0,0,.01)",
+                background: isDark ? "rgba(255,255,255,.01)" : "rgba(0,0,0,.01)",
                 borderTop: `1px solid ${isDark ? "rgba(56,139,255,.1)" : "rgba(0,0,0,.05)"}`,
               }}
             >
@@ -517,9 +374,7 @@ const AddUkuranNext = () => {
                 onClick={() => navigate("/ukuran")}
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-105"
                 style={{
-                  background: isDark
-                    ? "rgba(255,255,255,.08)"
-                    : "rgba(0,0,0,.05)",
+                  background: isDark ? "rgba(255,255,255,.08)" : "rgba(0,0,0,.05)",
                   color: isDark ? "rgba(255,255,255,.7)" : "rgba(0,0,0,.6)",
                   border: `1px solid ${isDark ? "rgba(255,255,255,.1)" : "rgba(0,0,0,.1)"}`,
                 }}
@@ -530,24 +385,15 @@ const AddUkuranNext = () => {
                 type="submit"
                 disabled={loading}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white text-sm font-semibold transition-all duration-200 hover:opacity-88 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  background: currentColor,
-                  boxShadow: `0 4px 18px ${currentColor}4d`,
-                }}
+                style={{ background: currentColor, boxShadow: `0 4px 18px ${currentColor}4d` }}
               >
                 {loading ? (
                   <>
-                    <div
-                      className="w-4 h-4 rounded-full border-2 animate-spin"
-                      style={{
-                        borderColor: "rgba(255,255,255,.2)",
-                        borderTopColor: "white",
-                      }}
-                    />
+                    <div className="w-4 h-4 rounded-full border-2 animate-spin" style={{ borderColor: "rgba(255,255,255,.2)", borderTopColor: "white" }} />
                     Menyimpan...
                   </>
                 ) : (
-                  <>Simpan</>
+                  <>Simpan & Selanjutnya</>
                 )}
               </button>
             </div>

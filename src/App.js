@@ -51,8 +51,7 @@ import {
   AddPendidikanNext,
   AddFisikNext,
   AddUkuranNext,
-  AddPasanganNext,
-  AddAnakNext,
+  AddKeluargaNext,
 
 } from "./pages";
 
@@ -164,8 +163,7 @@ const AppContent = () => {
               <Route path="/next/add/pendidikan" element={<AddPendidikanNext />} />
               <Route path="/next/add/fisik" element={<AddFisikNext />} />
               <Route path="/next/add/ukuran" element={<AddUkuranNext />} />
-              <Route path="/next/add/pasangan" element={<AddPasanganNext />} />
-              <Route path="/next/add/anak" element={<AddAnakNext />} />
+              <Route path="/next/add/pasangan" element={<AddKeluargaNext />} />
               
               <Route path="/page-not-found" element={<Page404 />} />
               <Route path="*" element={<Page404 />} />

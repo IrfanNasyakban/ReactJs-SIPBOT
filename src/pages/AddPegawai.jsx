@@ -349,6 +349,8 @@ const AddPegawai = () => {
                       }}
                     >
                       Gelar Depan
+                      <br />
+                      <span className="italic font-thin">(Kosongkan apabila tidak ada gelar)</span>
                     </label>
                     <input
                       name="gelarDepan"
@@ -392,6 +394,8 @@ const AddPegawai = () => {
                       }}
                     >
                       Gelar Belakang
+                      <br />
+                      <span className="italic font-thin">(Kosongkan apabila tidak ada gelar)</span>
                     </label>
                     <input
                       name="gelarBelakang"
@@ -724,12 +728,11 @@ const AddPegawai = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Email Pribadi <span style={{ color: "#ef4444" }}>*</span>
+                      Email Pribadi
                     </label>
                     <input
                       name="emailPribadi"
                       type="email"
-                      required
                       placeholder="nama@email.com"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
@@ -768,12 +771,11 @@ const AddPegawai = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Email Dinas <span style={{ color: "#ef4444" }}>*</span>
+                      Email Dinas
                     </label>
                     <input
                       name="emailDinas"
                       type="email"
-                      required
                       placeholder="nama@imigrasi.go.id"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
@@ -812,12 +814,11 @@ const AddPegawai = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Nomor Telepon <span style={{ color: "#ef4444" }}>*</span>
+                      Nomor Telepon
                     </label>
                     <input
                       name="noHp"
                       type="text"
-                      required
                       placeholder="08123456789"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
@@ -856,12 +857,11 @@ const AddPegawai = () => {
                           : "rgba(0,0,0,.7)",
                       }}
                     >
-                      Hobi <span style={{ color: "#ef4444" }}>*</span>
+                      Hobi
                     </label>
                     <input
                       name="hobi"
                       type="text"
-                      required
                       placeholder="Membaca, Olahraga, etc"
                       className="w-full px-4 py-2.5 rounded-xl text-sm transition-all duration-200"
                       style={{
